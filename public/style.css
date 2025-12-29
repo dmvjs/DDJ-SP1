@@ -67,11 +67,17 @@ body {
 
 .center-row-4,
 .center-row-2,
-.center-view-area,
-.center-load {
+.center-view-area {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.4rem;
+  width: 140px;
+}
+
+.center-load {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.7rem;
   width: 140px;
 }
 
@@ -99,9 +105,77 @@ body {
   font-size: 0.6rem;
 }
 
+/* Center LOAD buttons - smaller with stencil effect */
+#button-70-ch6 .button,
+#button-71-ch6 .button {
+  height: 32px;
+  background: var(--button-off);
+}
+
+#button-70-ch6 .button::before,
+#button-71-ch6 .button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 4px;
+  right: 4px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 3px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  z-index: 5;
+  pointer-events: none;
+}
+
+#button-70-ch6 .button::after,
+#button-71-ch6 .button::after {
+  content: 'LOAD';
+}
+
+#button-70-ch6 .button::after,
+#button-71-ch6 .button::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+  color: var(--button-off);
+  mix-blend-mode: lighten;
+  z-index: 10;
+  pointer-events: none;
+  width: 100%;
+  text-align: center;
+  background: none;
+  border-radius: 0;
+}
+
+#button-70-ch6 .button.active,
+#button-71-ch6 .button.active {
+  background: #ff4444;
+  border-color: #ff4444;
+  box-shadow: 0 0 20px rgba(255, 68, 68, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#button-70-ch6 .button.active::after,
+#button-71-ch6 .button.active::after {
+  color: #ff4444;
+}
+
+/* Hide labels below LOAD buttons */
+#button-70-ch6 .control-label,
+#button-71-ch6 .control-label {
+  display: none;
+}
+
 .center-browser .knob-container {
-  width: 70px;
-  height: 70px;
+  width: 110px;
+  height: 110px;
 }
 
 .center-browser .button {
@@ -247,14 +321,117 @@ body {
   display: none;
 }
 
+/* Make pad mode buttons smaller */
+#button-27-ch0 .button,
+#button-30-ch0 .button,
+#button-32-ch0 .button,
+#button-34-ch0 .button,
+#button-27-ch1 .button,
+#button-30-ch1 .button,
+#button-32-ch1 .button,
+#button-34-ch1 .button {
+  height: 32px;
+}
+
 .deck-buttons .control {
   gap: 0.5rem;
 }
 
+/* SYNC buttons - bigger with dual stencil labels */
 #button-88-ch0 .button,
 #button-88-ch1 .button {
-  width: 40px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
+  background: var(--button-off);
+}
+
+/* Circular inset stencil for SYNC */
+#button-88-ch0 .button::before,
+#button-88-ch1 .button::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* OFF box - much lighter so it's clearly visible */
+#button-88-ch0 .button::after,
+#button-88-ch1 .button::after {
+  content: '';
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 11px;
+  background: #888888;
+  border: 2px solid #999999;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.4);
+  z-index: 6;
+  pointer-events: none;
+}
+
+#button-88-ch0 .button.active::after,
+#button-88-ch1 .button.active::after {
+  background: #6699ff;
+  border-color: #77aaff;
+}
+
+/* SYNC button text labels */
+.stencil-text {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: 900;
+  letter-spacing: 0.3px;
+  color: var(--button-off);
+  mix-blend-mode: lighten;
+  z-index: 10;
+  pointer-events: none;
+  text-align: center;
+  background: none;
+}
+
+.stencil-text-top {
+  top: 13px;
+  font-size: 0.75rem;
+  letter-spacing: -0.5px;
+}
+
+.stencil-text-bottom {
+  bottom: 10px;
+  font-size: 0.55rem;
+  z-index: 7;
+  color: #000000;
+  mix-blend-mode: normal;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.3);
+  font-weight: 900;
+}
+
+#button-88-ch0 .button.active .stencil-text-top,
+#button-88-ch1 .button.active .stencil-text-top {
+  color: #4488ff;
+}
+
+/* OFF text stays black even when active */
+#button-88-ch0 .button.active .stencil-text-bottom,
+#button-88-ch1 .button.active .stencil-text-bottom {
+  color: #000000;
+}
+
+/* Hide labels below SYNC buttons */
+#button-88-ch0 .control-label,
+#button-88-ch1 .control-label {
+  display: none;
 }
 
 /* FX buttons (FX 1, 2, 3) - smaller rectangular buttons */
@@ -291,6 +468,100 @@ body {
   background: #ff8800;
   border-color: #ff8800;
   box-shadow: 0 0 20px rgba(255, 136, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Remove circular gradient effect from pad mode buttons */
+#button-27-ch0 .button,
+#button-30-ch0 .button,
+#button-32-ch0 .button,
+#button-34-ch0 .button,
+#button-27-ch1 .button,
+#button-30-ch1 .button,
+#button-32-ch1 .button,
+#button-34-ch1 .button {
+  background: var(--button-off);
+}
+
+/* Pad mode buttons - black inset rectangle with text cut out */
+#button-27-ch0 .button::before,
+#button-30-ch0 .button::before,
+#button-32-ch0 .button::before,
+#button-34-ch0 .button::before,
+#button-27-ch1 .button::before,
+#button-30-ch1 .button::before,
+#button-32-ch1 .button::before,
+#button-34-ch1 .button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 4px;
+  right: 4px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 3px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  z-index: 5;
+  pointer-events: none;
+}
+
+#button-27-ch0 .button::after,
+#button-27-ch1 .button::after {
+  content: 'HOT CUE';
+}
+
+#button-30-ch0 .button::after,
+#button-30-ch1 .button::after {
+  content: 'ROLL';
+}
+
+#button-32-ch0 .button::after,
+#button-32-ch1 .button::after {
+  content: 'SLICER';
+}
+
+#button-34-ch0 .button::after,
+#button-34-ch1 .button::after {
+  content: 'SAMPLER';
+}
+
+#button-27-ch0 .button::after,
+#button-30-ch0 .button::after,
+#button-32-ch0 .button::after,
+#button-34-ch0 .button::after,
+#button-27-ch1 .button::after,
+#button-30-ch1 .button::after,
+#button-32-ch1 .button::after,
+#button-34-ch1 .button::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+  color: var(--button-off);
+  mix-blend-mode: lighten;
+  z-index: 10;
+  pointer-events: none;
+  width: 100%;
+  text-align: center;
+  background: none;
+  border-radius: 0;
+}
+
+#button-27-ch0 .button.active::after,
+#button-30-ch0 .button.active::after,
+#button-32-ch0 .button.active::after,
+#button-34-ch0 .button.active::after,
+#button-27-ch1 .button.active::after,
+#button-30-ch1 .button.active::after,
+#button-32-ch1 .button.active::after,
+#button-34-ch1 .button.active::after {
+  color: #4488ff;
 }
 
 #button-27-ch0 .button.active,
@@ -397,9 +668,148 @@ body {
   }
 }
 
+/* FX knobs styling */
 .fx-knobs .knob-container {
   width: 100px;
   height: 100px;
+  position: relative;
+}
+
+/* Outer white dashed ring - only in 7:00-5:00 range for FX knobs */
+#knob-2-ch4 .knob-container::before,
+#knob-4-ch4 .knob-container::before,
+#knob-6-ch4 .knob-container::before,
+#knob-2-ch5 .knob-container::before,
+#knob-4-ch5 .knob-container::before,
+#knob-6-ch5 .knob-container::before {
+  content: '' !important;
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    white 0deg,
+    white 50deg,
+    transparent 50deg,
+    transparent 60deg,
+    white 60deg,
+    white 100deg,
+    transparent 100deg,
+    transparent 110deg,
+    white 110deg,
+    white 150deg,
+    transparent 150deg,
+    transparent 210deg,
+    white 210deg,
+    white 250deg,
+    transparent 250deg,
+    transparent 260deg,
+    white 260deg,
+    white 300deg,
+    transparent 300deg,
+    transparent 310deg,
+    white 310deg,
+    white 350deg,
+    transparent 350deg,
+    transparent 360deg
+  ) !important;
+  mask: radial-gradient(circle, transparent 46%, black 46%, black 50%, transparent 50%) !important;
+  -webkit-mask: radial-gradient(circle, transparent 46%, black 46%, black 50%, transparent 50%) !important;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Full ring for BEATS, AUTO LOOP, and BROWSER knobs */
+.fx-knobs #knob-0-ch4 .knob-container::before,
+.fx-knobs #knob-0-ch5 .knob-container::before,
+#knob-23-ch0 .knob-container::before,
+#knob-23-ch1 .knob-container::before,
+#knob-64-ch6 .knob-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    white 0deg 50deg,
+    transparent 50deg 60deg,
+    white 60deg 110deg,
+    transparent 110deg 120deg,
+    white 120deg 170deg,
+    transparent 170deg 180deg,
+    white 180deg 230deg,
+    transparent 230deg 240deg,
+    white 240deg 290deg,
+    transparent 290deg 300deg,
+    white 300deg 350deg,
+    transparent 350deg 360deg
+  );
+  mask: radial-gradient(circle, transparent 46%, black 46%, black 50%, transparent 50%);
+  -webkit-mask: radial-gradient(circle, transparent 46%, black 46%, black 50%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Inner solid light grey ring - thicker under handle */
+.fx-knobs .knob-progress,
+#knob-23-ch0 .knob-progress,
+#knob-23-ch1 .knob-progress,
+#knob-64-ch6 .knob-progress {
+  background: none !important;
+}
+
+.fx-knobs .knob-progress::before,
+#knob-23-ch0 .knob-progress::before,
+#knob-23-ch1 .knob-progress::before,
+#knob-64-ch6 .knob-progress::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  border: 3px solid #999999;
+  pointer-events: none;
+}
+
+/* Black knob handle */
+.fx-knobs .knob,
+#knob-23-ch0 .knob,
+#knob-23-ch1 .knob,
+#knob-64-ch6 .knob {
+  background: #000000;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* White line indicator on handle */
+.fx-knobs .knob::before,
+#knob-23-ch0 .knob::before,
+#knob-23-ch1 .knob::before,
+#knob-64-ch6 .knob::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 40%;
+  background: white;
+  border-radius: 1px;
+  box-shadow: none;
+}
+
+/* Black circle background for value */
+.fx-knobs .knob-value,
+#knob-23-ch0 .knob-value,
+#knob-23-ch1 .knob-value,
+#knob-64-ch6 .knob-value {
+  background: #000000;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.8rem;
+  z-index: 10;
 }
 
 .deck-buttons .knob-container {

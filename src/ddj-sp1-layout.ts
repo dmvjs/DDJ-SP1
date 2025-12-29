@@ -98,18 +98,18 @@ export const DDJ_SP1_LAYOUT: ControlDefinition[] = [
   { id: 'button-34-ch1', type: 'button', channel: 1, number: 34, label: 'SAMPLER', section: 'deck-b-buttons' },
 
   // Center Controls
-  // Row 1 - Deck selection buttons (4 buttons) - FX ASSIGN + DECK buttons
-  { id: 'button-76-ch6', type: 'button', channel: 6, number: 76, label: 'FX 1/2', section: 'center-row-4' },
-  { id: 'button-80-ch6', type: 'button', channel: 6, number: 80, label: 'DECK', section: 'center-row-4' },
-  { id: 'button-77-ch6', type: 'button', channel: 6, number: 77, label: 'FX 3/4', section: 'center-row-4' },
-  { id: 'button-81-ch6', type: 'button', channel: 6, number: 81, label: 'DECK', section: 'center-row-4' },
+  // Row 1 - Deck selection buttons (4 buttons labeled "3" and "4" with DECK above)
+  { id: 'button-76-ch6', type: 'button', channel: 6, number: 76, label: '3', section: 'center-row-4' },
+  { id: 'button-80-ch6', type: 'button', channel: 6, number: 80, label: '3', section: 'center-row-4' },
+  { id: 'button-77-ch6', type: 'button', channel: 6, number: 77, label: '4', section: 'center-row-4' },
+  { id: 'button-81-ch6', type: 'button', channel: 6, number: 81, label: '4', section: 'center-row-4' },
 
   // Row 2 - DECK buttons for deck 1/3 and 2/4 switching
   { id: 'button-114-ch2', type: 'button', channel: 2, number: 114, label: 'DECK 1/3', section: 'center-row-2' },
   { id: 'button-114-ch3', type: 'button', channel: 3, number: 114, label: 'DECK 2/4', section: 'center-row-2' },
 
-  // Row 3 - Browser controls
-  { id: 'knob-64-ch6', type: 'knob', channel: 6, number: 64, label: 'BROWSER', section: 'center-browser' },
+  // Row 3 - Panel Select (browser) controls
+  { id: 'knob-64-ch6', type: 'knob', channel: 6, number: 64, label: 'PANEL SELECT', section: 'center-browser' },
   { id: 'button-65-ch6', type: 'button', channel: 6, number: 65, label: 'LOAD PREPARE', section: 'center-browser' },
 
   // Row 4 - Back/Utility and View/Area (2 buttons)

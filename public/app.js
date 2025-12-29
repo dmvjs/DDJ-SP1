@@ -51,6 +51,20 @@ function createControlFromDefinition(definition) {
   if (definition.type === 'button') {
     const button = document.createElement('div');
     button.className = 'button';
+
+    // Add stencil text for SYNC buttons
+    if (definition.id === 'button-88-ch0' || definition.id === 'button-88-ch1') {
+      const syncText = document.createElement('span');
+      syncText.className = 'stencil-text stencil-text-top';
+      syncText.textContent = 'SYNC';
+      button.appendChild(syncText);
+
+      const offText = document.createElement('span');
+      offText.className = 'stencil-text stencil-text-bottom';
+      offText.textContent = 'OFF';
+      button.appendChild(offText);
+    }
+
     control.appendChild(button);
   } else if (definition.type === 'slider') {
     const sliderContainer = document.createElement('div');
@@ -104,6 +118,12 @@ function handleEvent(event) {
 }
 
 
+// FX knobs that use 7:00 to 5:00 range (300 degrees)
+const fxKnobs = new Set([
+  'knob-2-ch4', 'knob-4-ch4', 'knob-6-ch4',  // Deck A FX knobs
+  'knob-2-ch5', 'knob-4-ch5', 'knob-6-ch5'   // Deck B FX knobs
+]);
+
 function updateControl(event, key) {
   const controlData = controls.get(key);
   if (!controlData) return;
@@ -147,7 +167,14 @@ function updateControl(event, key) {
 
       value.textContent = event.value;
 
-      const degrees = (event.value / 127) * 360;
+      // FX knobs use 7:00 to 5:00 range (-150° to +150°, 300° total)
+      let degrees;
+      if (fxKnobs.has(key)) {
+        degrees = -150 + (event.value / 127) * 300;
+      } else {
+        degrees = (event.value / 127) * 360;
+      }
+
       progress.style.setProperty('--progress', `${degrees}deg`);
       knob.style.transform = `rotate(${degrees}deg)`;
       value.style.transform = `translate(-50%, -50%) rotate(${-degrees}deg)`;
