@@ -257,14 +257,13 @@ body {
   border-radius: 50%;
 }
 
+/* FX buttons (FX 1, 2, 3) - smaller rectangular buttons */
 #button-71-ch4 .button,
 #button-72-ch4 .button,
 #button-73-ch4 .button,
-#button-74-ch4 .button,
 #button-71-ch5 .button,
 #button-72-ch5 .button,
-#button-73-ch5 .button,
-#button-74-ch5 .button {
+#button-73-ch5 .button {
   height: 30px;
   border-radius: 6px;
 }
@@ -272,14 +271,26 @@ body {
 #button-71-ch4 .button.active,
 #button-72-ch4 .button.active,
 #button-73-ch4 .button.active,
-#button-74-ch4 .button.active,
 #button-71-ch5 .button.active,
 #button-72-ch5 .button.active,
-#button-73-ch5 .button.active,
-#button-74-ch5 .button.active {
+#button-73-ch5 .button.active {
   background: #ff4444;
   border-color: #ff4444;
   box-shadow: 0 0 20px rgba(255, 68, 68, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* FX ASSIGN buttons - rectangular buttons with orange/amber color */
+#button-74-ch4 .button,
+#button-74-ch5 .button {
+  height: 30px;
+  border-radius: 6px;
+}
+
+#button-74-ch4 .button.active,
+#button-74-ch5 .button.active {
+  background: #ff8800;
+  border-color: #ff8800;
+  box-shadow: 0 0 20px rgba(255, 136, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 #button-27-ch0 .button.active,
