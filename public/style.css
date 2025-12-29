@@ -58,45 +58,30 @@ body {
   gap: 1rem;
 }
 
-/* Center section rows */
-.center-row-4,
-.center-row-2,
-.center-browser,
-.center-view-area,
-.center-load,
-.center-shift,
-.center-volume {
+.center-section > * {
   display: flex;
   justify-content: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
-.center-row-4 {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.4rem;
-  max-width: 140px;
-}
-
-.center-row-2 {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.4rem;
-  max-width: 140px;
-  min-width: 140px;
-}
-
+.center-row-4,
+.center-row-2,
 .center-view-area,
 .center-load {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.4rem;
-  max-width: 140px;
+  width: 140px;
 }
 
-.center-shift {
-  max-width: 70px;
+#center-shift {
+  width: 140px;
+  display: block;
+}
+
+#center-shift .button {
+  width: 100%;
 }
 
 .center-browser {
@@ -105,12 +90,7 @@ body {
   gap: 0.3rem;
 }
 
-/* Center control sizing */
-.center-row-4 .button,
-.center-row-2 .button,
-.center-view-area .button,
-.center-load .button,
-.center-shift .button {
+.center-section .button {
   width: 100%;
   height: 24px;
   min-height: unset;
@@ -133,7 +113,6 @@ body {
   font-size: 0.55rem;
 }
 
-/* Vertical slider */
 .slider-container {
   width: 40px;
   height: 120px;
@@ -146,7 +125,7 @@ body {
   position: relative;
   width: 8px;
   height: 100%;
-  background: var(--knob-track);
+  background: #000000;
   border-radius: 4px;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
@@ -167,13 +146,69 @@ body {
   bottom: 0%;
   left: 50%;
   transform: translate(-50%, 50%);
-  width: 32px;
-  height: 8px;
-  background: var(--text-primary);
-  border: 1px solid var(--bg-light);
+  width: 75px;
+  height: 24px;
+  background: linear-gradient(to bottom,
+    #000000 0%,
+    #000000 33%,
+    #ffffff 33%,
+    #ffffff 67%,
+    #000000 67%,
+    #000000 100%);
+  border: 1px solid #666666;
   border-radius: 2px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   transition: bottom 0.1s ease;
+  z-index: 3;
+}
+
+.slider-container {
+  position: relative;
+}
+
+.slider-container::before,
+.slider-container::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 2px;
+  background: white;
+  z-index: 2;
+}
+
+.slider-container::before {
+  top: 0;
+}
+
+.slider-container::after {
+  bottom: 0;
+}
+
+.slider-track::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 2px;
+  background: #ff4444;
+  z-index: 2;
+}
+
+.slider-track::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 25%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 2px;
+  background: #ff4444;
+  z-index: 2;
+  box-shadow: 0 60px 0 0 #ff4444;
 }
 
 .center-section .control {
@@ -184,7 +219,6 @@ body {
   font-size: 0.55rem;
 }
 
-/* FX Knobs Row */
 .fx-knobs {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -194,7 +228,6 @@ body {
   border-radius: 0.5rem;
 }
 
-/* Deck Buttons Row */
 .deck-buttons {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -218,14 +251,12 @@ body {
   gap: 0.5rem;
 }
 
-/* SYNC button - circular */
 #button-88-ch0 .button,
 #button-88-ch1 .button {
   width: 40px;
   border-radius: 50%;
 }
 
-/* FX ON row buttons - small and rectangular */
 #button-71-ch4 .button,
 #button-72-ch4 .button,
 #button-73-ch4 .button,
@@ -238,7 +269,6 @@ body {
   border-radius: 6px;
 }
 
-/* FX ON row - red when active */
 #button-71-ch4 .button.active,
 #button-72-ch4 .button.active,
 #button-73-ch4 .button.active,
@@ -252,7 +282,6 @@ body {
   box-shadow: 0 0 20px rgba(255, 68, 68, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* HOT CUE row - blue buttons */
 #button-27-ch0 .button.active,
 #button-30-ch0 .button.active,
 #button-32-ch0 .button.active,
@@ -266,7 +295,6 @@ body {
   box-shadow: 0 0 20px rgba(68, 136, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Performance Pads - 2 rows x 4 columns */
 .performance-pads {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -302,7 +330,6 @@ body {
   letter-spacing: 0.5px;
 }
 
-/* Button styles */
 .button {
   width: 100%;
   aspect-ratio: 1;
@@ -331,7 +358,6 @@ body {
   transform: scale(0.95);
 }
 
-/* Knob styles */
 .knob-container {
   position: relative;
   width: 90px;
@@ -363,13 +389,6 @@ body {
 .fx-knobs .knob-container {
   width: 100px;
   height: 100px;
-}
-
-/* Parameter knob (4th knob) is smaller */
-#knob-0-ch4 .knob-container,
-#knob-0-ch5 .knob-container {
-  width: 70px;
-  height: 70px;
 }
 
 .deck-buttons .knob-container {

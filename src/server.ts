@@ -34,16 +34,9 @@ try {
 
 // Broadcast events to all connected clients
 manager.on('event', (event) => {
-  // Log events to console for debugging
-  if (event.type === 'knob') {
-    console.log(`Knob ${event.knob} = ${event.value} (Channel ${event.channel})`);
-  } else {
-    console.log(`Button ${event.button} ${event.pressed ? 'pressed' : 'released'} (Channel ${event.channel})`);
-  }
-
   const message = JSON.stringify({ type: 'event', data: event });
   wss.clients.forEach((client) => {
-    if (client.readyState === 1) { // WebSocket.OPEN
+    if (client.readyState === 1) {
       client.send(message);
     }
   });

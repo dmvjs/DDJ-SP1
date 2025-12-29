@@ -1,3 +1,6 @@
+/**
+ * Event emitted when a button is pressed or released
+ */
 export interface ButtonEvent {
   type: 'button';
   button: number;
@@ -5,6 +8,9 @@ export interface ButtonEvent {
   channel: number;
 }
 
+/**
+ * Event emitted when a knob or slider is adjusted
+ */
 export interface KnobEvent {
   type: 'knob';
   knob: number;
@@ -12,18 +18,7 @@ export interface KnobEvent {
   channel: number;
 }
 
+/**
+ * Union type of all controller events
+ */
 export type ControllerEvent = ButtonEvent | KnobEvent;
-
-export interface MidiNoteMessage {
-  channel: number;
-  note: number;
-  velocity: number;
-  _type: 'noteon' | 'noteoff';
-}
-
-export interface MidiCCMessage {
-  channel: number;
-  controller: number;
-  value: number;
-  _type: 'cc';
-}

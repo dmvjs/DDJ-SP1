@@ -1,12 +1,18 @@
 /**
  * DDJ-SP1 Hardware Layout
- * Based on Pioneer DDJ-SP1 specifications
  *
- * Layout:
+ * Complete mapping of all Pioneer DDJ-SP1 controls including:
  * - 8 performance pads per deck (16 total)
- * - 3 FX parameter knobs per deck
- * - 1 BPM jogwheel (center)
- * - Various buttons for modes and controls
+ * - 4 FX knobs per deck (3 effects + 1 parameter)
+ * - 3 rows of control buttons per deck
+ * - Center browser and utility controls
+ * - 1 sampler volume slider
+ *
+ * Channel Mapping:
+ * - Ch 0/1: Deck A/B control buttons
+ * - Ch 4/5: Deck A/B FX controls
+ * - Ch 6: Center section
+ * - Ch 7/8: Deck A/B performance pads
  */
 
 export interface ControlDefinition {
@@ -43,14 +49,14 @@ export const DDJ_SP1_LAYOUT: ControlDefinition[] = [
   { id: 'knob-2-ch4', type: 'knob', channel: 4, number: 2, label: 'FX 1', section: 'deck-a-top' },
   { id: 'knob-4-ch4', type: 'knob', channel: 4, number: 4, label: 'FX 2', section: 'deck-a-top' },
   { id: 'knob-6-ch4', type: 'knob', channel: 4, number: 6, label: 'FX 3', section: 'deck-a-top' },
-  { id: 'knob-0-ch4', type: 'knob', channel: 4, number: 0, label: 'Parameter', section: 'deck-a-top' },
+  { id: 'knob-0-ch4', type: 'knob', channel: 4, number: 0, label: 'BEATS', section: 'deck-a-top' },
   { id: 'button-67-ch4', type: 'button', channel: 4, number: 67, label: '', section: 'deck-a-top' },
 
   // Deck B - Top Row Dials (Channel 5)
   { id: 'knob-2-ch5', type: 'knob', channel: 5, number: 2, label: 'FX 1', section: 'deck-b-top' },
   { id: 'knob-4-ch5', type: 'knob', channel: 5, number: 4, label: 'FX 2', section: 'deck-b-top' },
   { id: 'knob-6-ch5', type: 'knob', channel: 5, number: 6, label: 'FX 3', section: 'deck-b-top' },
-  { id: 'knob-0-ch5', type: 'knob', channel: 5, number: 0, label: 'Parameter', section: 'deck-b-top' },
+  { id: 'knob-0-ch5', type: 'knob', channel: 5, number: 0, label: 'BEATS', section: 'deck-b-top' },
   { id: 'button-67-ch5', type: 'button', channel: 5, number: 67, label: '', section: 'deck-b-top' },
 
   // Deck A - Top Button Row (FX ON buttons)

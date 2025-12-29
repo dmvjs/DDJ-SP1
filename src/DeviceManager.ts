@@ -1,6 +1,6 @@
 import easymidi from 'easymidi';
 import { EventEmitter } from 'events';
-import { ControllerEvent, MidiNoteMessage, MidiCCMessage } from './types.js';
+import { ControllerEvent } from './types.js';
 
 export class DeviceManager extends EventEmitter {
   private input: easymidi.Input | null = null;
