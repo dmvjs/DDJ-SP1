@@ -65,6 +65,31 @@ function createControlFromDefinition(definition) {
       button.appendChild(offText);
     }
 
+    // Add ON and FX SELECT for FX buttons (FX 1, 2, 3)
+    if (definition.id === 'button-71-ch4' || definition.id === 'button-72-ch4' || definition.id === 'button-73-ch4' ||
+        definition.id === 'button-71-ch5' || definition.id === 'button-72-ch5' || definition.id === 'button-73-ch5') {
+      const onText = document.createElement('span');
+      onText.className = 'fx-on-text';
+      onText.textContent = 'ON';
+      button.appendChild(onText);
+
+      const fxSelectStencil = document.createElement('span');
+      fxSelectStencil.className = 'fx-select-stencil';
+      button.appendChild(fxSelectStencil);
+    }
+
+    // Add TAP and FX MODE for FX ASSIGN buttons (fourth button)
+    if (definition.id === 'button-74-ch4' || definition.id === 'button-74-ch5') {
+      const tapText = document.createElement('span');
+      tapText.className = 'fx-on-text';
+      tapText.textContent = 'TAP';
+      button.appendChild(tapText);
+
+      const fxModeStencil = document.createElement('span');
+      fxModeStencil.className = 'fx-select-stencil fx-mode-stencil';
+      button.appendChild(fxModeStencil);
+    }
+
     control.appendChild(button);
   } else if (definition.type === 'slider') {
     const sliderContainer = document.createElement('div');

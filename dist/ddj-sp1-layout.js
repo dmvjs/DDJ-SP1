@@ -34,15 +34,15 @@ export const DDJ_SP1_LAYOUT = [
         section: 'deck-b'
     })),
     // Deck A - Top Row Dials (Channel 4)
-    { id: 'knob-2-ch4', type: 'knob', channel: 4, number: 2, label: 'FX 1', section: 'deck-a-top' },
-    { id: 'knob-4-ch4', type: 'knob', channel: 4, number: 4, label: 'FX 2', section: 'deck-a-top' },
-    { id: 'knob-6-ch4', type: 'knob', channel: 4, number: 6, label: 'FX 3', section: 'deck-a-top' },
+    { id: 'knob-2-ch4', type: 'knob', channel: 4, number: 2, label: '1', section: 'deck-a-top' },
+    { id: 'knob-4-ch4', type: 'knob', channel: 4, number: 4, label: '2', section: 'deck-a-top' },
+    { id: 'knob-6-ch4', type: 'knob', channel: 4, number: 6, label: '3', section: 'deck-a-top' },
     { id: 'knob-0-ch4', type: 'knob', channel: 4, number: 0, label: 'BEATS', section: 'deck-a-top' },
     { id: 'button-67-ch4', type: 'button', channel: 4, number: 67, label: 'TAP', section: 'deck-a-top' },
     // Deck B - Top Row Dials (Channel 5)
-    { id: 'knob-2-ch5', type: 'knob', channel: 5, number: 2, label: 'FX 1', section: 'deck-b-top' },
-    { id: 'knob-4-ch5', type: 'knob', channel: 5, number: 4, label: 'FX 2', section: 'deck-b-top' },
-    { id: 'knob-6-ch5', type: 'knob', channel: 5, number: 6, label: 'FX 3', section: 'deck-b-top' },
+    { id: 'knob-2-ch5', type: 'knob', channel: 5, number: 2, label: '1', section: 'deck-b-top' },
+    { id: 'knob-4-ch5', type: 'knob', channel: 5, number: 4, label: '2', section: 'deck-b-top' },
+    { id: 'knob-6-ch5', type: 'knob', channel: 5, number: 6, label: '3', section: 'deck-b-top' },
     { id: 'knob-0-ch5', type: 'knob', channel: 5, number: 0, label: 'BEATS', section: 'deck-b-top' },
     { id: 'button-67-ch5', type: 'button', channel: 5, number: 67, label: 'TAP', section: 'deck-b-top' },
     // Deck A - Top Button Row (FX ON buttons + FX ASSIGN)

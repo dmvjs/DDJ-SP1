@@ -48,7 +48,7 @@ body {
 .deck {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0;
 }
 
 .center-section {
@@ -395,7 +395,7 @@ body {
 #button-101-ch6 .control-label,
 #button-103-ch6 .control-label {
   white-space: pre-line;
-  line-height: 0.9;
+  line-height: 1.2;
   font-size: 0.6rem;
 }
 
@@ -571,19 +571,40 @@ body {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
-  padding: 1.5rem 1rem;
+  padding: 1.5rem 1rem 0.5rem 1rem;
   background: var(--bg-dark);
-  border-radius: 0.5rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+/* FX knobs - labels below knobs instead of above */
+.fx-knobs .control-label {
+  order: 1;
+  text-align: right;
+  width: 100%;
 }
 
 .deck-buttons {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   gap: 0.75rem;
-  padding: 1rem;
+  padding: 0 1rem 1rem 1rem;
   background: var(--bg-dark);
-  border-radius: 0.5rem;
+  border-radius: 0 0 0.5rem 0.5rem;
   align-items: center;
+}
+
+/* Hide labels for FX buttons below the knobs */
+#button-71-ch4 .control-label,
+#button-72-ch4 .control-label,
+#button-73-ch4 .control-label,
+#button-74-ch4 .control-label,
+#button-67-ch4 .control-label,
+#button-71-ch5 .control-label,
+#button-72-ch5 .control-label,
+#button-73-ch5 .control-label,
+#button-74-ch5 .control-label,
+#button-67-ch5 .control-label {
+  display: none;
 }
 
 .deck-buttons .button {
@@ -694,14 +715,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 0.3rem;
   width: calc(200% + 0.75rem);
   height: 16px;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 3px;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
   position: absolute;
-  bottom: -19px;
+  bottom: -29px;
   left: 0;
   font-size: 0.5rem;
   font-weight: 800;
@@ -901,6 +921,7 @@ body {
 #button-73-ch5 .button {
   height: 30px;
   border-radius: 6px;
+  background: var(--button-off);
 }
 
 #button-71-ch4 .button.active,
@@ -912,6 +933,70 @@ body {
   background: #ff4444;
   border-color: #ff4444;
   box-shadow: 0 0 20px rgba(255, 68, 68, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* FX buttons (FX 1, 2, 3, FX ASSIGN) - ON + FX SELECT layout */
+#button-71-ch4 .button,
+#button-72-ch4 .button,
+#button-73-ch4 .button,
+#button-74-ch4 .button,
+#button-71-ch5 .button,
+#button-72-ch5 .button,
+#button-73-ch5 .button,
+#button-74-ch5 .button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 4px;
+}
+
+/* "ON" text on the left */
+.fx-on-text {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #000000;
+}
+
+/* "FX SELECT" container with black stencil background */
+.fx-select-stencil {
+  flex: 1;
+  margin-left: 4px;
+  position: relative;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 3px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 2px 5px;
+}
+
+/* FX SELECT text with cutout effect */
+.fx-select-stencil::after {
+  content: 'FX SELECT';
+  font-size: 0.6rem;
+  font-weight: 900;
+  color: var(--button-off);
+  letter-spacing: 0.3px;
+  mix-blend-mode: lighten;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+/* FX MODE text for TAP buttons */
+.fx-mode-stencil::after {
+  content: 'FX MODE';
+}
+
+/* FX SELECT and FX MODE text turns red when button is active */
+#button-71-ch4 .button.active .fx-select-stencil::after,
+#button-72-ch4 .button.active .fx-select-stencil::after,
+#button-73-ch4 .button.active .fx-select-stencil::after,
+#button-74-ch4 .button.active .fx-select-stencil::after,
+#button-71-ch5 .button.active .fx-select-stencil::after,
+#button-72-ch5 .button.active .fx-select-stencil::after,
+#button-73-ch5 .button.active .fx-select-stencil::after,
+#button-74-ch5 .button.active .fx-select-stencil::after {
+  color: #ff4444;
 }
 
 /* FX ASSIGN buttons - rectangular buttons with orange/amber color */
@@ -1100,6 +1185,7 @@ body {
   grid-template-rows: repeat(2, 1fr);
   gap: 0.75rem;
   padding: 1.5rem;
+  margin-top: 1.5rem;
   background: var(--bg-dark);
   border-radius: 0.5rem;
 }
