@@ -1259,6 +1259,7 @@ body {
   box-shadow: 0 0 12px rgba(255, 0, 0, 0.6);
   pointer-events: none;
   animation: pulse-ring 0.3s ease-out;
+  z-index: 999;
 }
 
 @keyframes pulse-ring {
