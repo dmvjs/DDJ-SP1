@@ -9,6 +9,9 @@ ws.onclose = () => {
   console.log('Disconnected from DDJ-SP1');
 };
 
+// Track locked buttons
+const lockedButtons = new Map(); // key: "channel:button", value: boolean
+
 ws.onmessage = (event) => {
   const message = JSON.parse(event.data);
 
@@ -16,8 +19,29 @@ ws.onmessage = (event) => {
     initializeLayout(message.data);
   } else if (message.type === 'event') {
     handleEvent(message.data);
+  } else if (message.type === 'lock') {
+    handleLockChange(message.data);
   }
 };
+
+function handleLockChange(lockData) {
+  const key = `button-${lockData.button}-ch${lockData.channel}`;
+  const lockKey = `${lockData.channel}:${lockData.button}`;
+
+  lockedButtons.set(lockKey, lockData.locked);
+
+  if (controls.has(key)) {
+    const control = controls.get(key);
+    const button = control.querySelector('.button');
+    if (button) {
+      if (lockData.locked) {
+        button.classList.add('active');
+      } else {
+        button.classList.remove('active');
+      }
+    }
+  }
+}
 
 function initializeLayout(layout) {
   layout.forEach(control => {
@@ -172,9 +196,13 @@ function updateControl(event, key) {
 
   if (event.type === 'button') {
     const button = control.querySelector('.button');
+    const lockKey = `${event.channel}:${event.button}`;
+    const isLocked = lockedButtons.get(lockKey) || false;
+
     if (event.pressed) {
       button.classList.add('active');
-    } else {
+    } else if (!isLocked) {
+      // Only remove active class if button is not locked
       button.classList.remove('active');
     }
   } else {

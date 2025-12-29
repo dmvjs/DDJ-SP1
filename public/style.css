@@ -1416,6 +1416,30 @@ body {
   z-index: 10;
 }
 
+/* Infinite encoder knobs (BEATS, PANEL SELECT) - hide progress arc */
+#knob-0-ch4 .knob-progress,
+#knob-0-ch5 .knob-progress,
+#knob-64-ch6 .knob-progress {
+  display: none !important;
+}
+
+/* Position marker for infinite encoders */
+#knob-0-ch4 .knob::after,
+#knob-0-ch5 .knob::after,
+#knob-64-ch6 .knob::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 12px;
+  background: #ffffff;
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  z-index: 10;
+}
+
 .deck-buttons .knob-container {
   width: 60px;
   height: 60px;
