@@ -71,6 +71,7 @@ export class DeviceManager extends EventEmitter {
 
     // Handle button presses (Note On/Off)
     this.input.on('noteon', (msg: any) => {
+      console.log('🔵 BUTTON:', `note=${msg.note}`, `channel=${msg.channel}`, `velocity=${msg.velocity}`);
       const event: ControllerEvent = {
         type: 'button',
         button: msg.note,
@@ -83,6 +84,7 @@ export class DeviceManager extends EventEmitter {
 
     // Handle knobs and dials (Control Change)
     this.input.on('cc', (msg: any) => {
+      console.log('🔄 KNOB:', `controller=${msg.controller}`, `channel=${msg.channel}`, `value=${msg.value}`);
       const event: ControllerEvent = {
         type: 'knob',
         knob: msg.controller,
