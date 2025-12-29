@@ -1,0 +1,432 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-dark: #0a0a0a;
+  --bg-medium: #1a1a1a;
+  --bg-light: #2a2a2a;
+  --accent: #ff4444;
+  --accent-glow: rgba(255, 68, 68, 0.4);
+  --text-primary: #ffffff;
+  --text-secondary: #888888;
+  --button-off: #333333;
+  --button-on: #ff4444;
+  --knob-track: #333333;
+  --knob-fill: #ff4444;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-medium) 100%);
+  color: var(--text-primary);
+  min-height: 100vh;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  max-width: 1800px;
+  width: 100%;
+}
+
+
+.controller {
+  display: grid;
+  grid-template-columns: 2fr 1fr 2fr;
+  gap: 2rem;
+  background: var(--bg-medium);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.deck {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.center-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Center section rows */
+.center-row-4,
+.center-row-2,
+.center-browser,
+.center-view-area,
+.center-load,
+.center-shift,
+.center-volume {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.center-row-4 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
+  max-width: 140px;
+}
+
+.center-row-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
+  max-width: 140px;
+  min-width: 140px;
+}
+
+.center-view-area,
+.center-load {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
+  max-width: 140px;
+}
+
+.center-shift {
+  max-width: 70px;
+}
+
+.center-browser {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Center control sizing */
+.center-row-4 .button,
+.center-row-2 .button,
+.center-view-area .button,
+.center-load .button,
+.center-shift .button {
+  width: 100%;
+  height: 24px;
+  min-height: unset;
+  aspect-ratio: auto;
+  border-radius: 4px;
+  font-size: 0.6rem;
+}
+
+.center-browser .knob-container {
+  width: 70px;
+  height: 70px;
+}
+
+.center-browser .button {
+  width: 50px;
+  height: 20px;
+  min-height: unset;
+  aspect-ratio: auto;
+  border-radius: 3px;
+  font-size: 0.55rem;
+}
+
+/* Vertical slider */
+.slider-container {
+  width: 40px;
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.slider-track {
+  position: relative;
+  width: 8px;
+  height: 100%;
+  background: var(--knob-track);
+  border-radius: 4px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.slider-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0%;
+  background: var(--knob-fill);
+  border-radius: 4px;
+  transition: height 0.1s ease;
+}
+
+.slider-thumb {
+  position: absolute;
+  bottom: 0%;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  width: 32px;
+  height: 8px;
+  background: var(--text-primary);
+  border: 1px solid var(--bg-light);
+  border-radius: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: bottom 0.1s ease;
+}
+
+.center-section .control {
+  gap: 0.3rem;
+}
+
+.center-section .control-label {
+  font-size: 0.55rem;
+}
+
+/* FX Knobs Row */
+.fx-knobs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  padding: 1.5rem 1rem;
+  background: var(--bg-dark);
+  border-radius: 0.5rem;
+}
+
+/* Deck Buttons Row */
+.deck-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--bg-dark);
+  border-radius: 0.5rem;
+}
+
+.deck-buttons .button {
+  aspect-ratio: auto;
+  height: 40px;
+  min-height: unset;
+}
+
+.deck-buttons .button::after {
+  display: none;
+}
+
+.deck-buttons .control {
+  gap: 0.5rem;
+}
+
+/* SYNC button - circular */
+#button-88-ch0 .button,
+#button-88-ch1 .button {
+  width: 40px;
+  border-radius: 50%;
+}
+
+/* FX ON row buttons - small and rectangular */
+#button-71-ch4 .button,
+#button-72-ch4 .button,
+#button-73-ch4 .button,
+#button-74-ch4 .button,
+#button-71-ch5 .button,
+#button-72-ch5 .button,
+#button-73-ch5 .button,
+#button-74-ch5 .button {
+  height: 30px;
+  border-radius: 6px;
+}
+
+/* FX ON row - red when active */
+#button-71-ch4 .button.active,
+#button-72-ch4 .button.active,
+#button-73-ch4 .button.active,
+#button-74-ch4 .button.active,
+#button-71-ch5 .button.active,
+#button-72-ch5 .button.active,
+#button-73-ch5 .button.active,
+#button-74-ch5 .button.active {
+  background: #ff4444;
+  border-color: #ff4444;
+  box-shadow: 0 0 20px rgba(255, 68, 68, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* HOT CUE row - blue buttons */
+#button-27-ch0 .button.active,
+#button-30-ch0 .button.active,
+#button-32-ch0 .button.active,
+#button-34-ch0 .button.active,
+#button-27-ch1 .button.active,
+#button-30-ch1 .button.active,
+#button-32-ch1 .button.active,
+#button-34-ch1 .button.active {
+  background: #4488ff;
+  border-color: #4488ff;
+  box-shadow: 0 0 20px rgba(68, 136, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Performance Pads - 2 rows x 4 columns */
+.performance-pads {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: var(--bg-dark);
+  border-radius: 0.5rem;
+}
+
+.performance-pads .button {
+  min-height: 80px;
+  border-radius: 12px;
+}
+
+.performance-pads .control-label {
+  display: none;
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.control-label {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Button styles */
+.button {
+  width: 100%;
+  aspect-ratio: 1;
+  min-height: 50px;
+  border-radius: 8px;
+  background: var(--button-off);
+  border: 2px solid var(--bg-light);
+  transition: all 0.15s ease;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.button::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.button.active {
+  background: var(--button-on);
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: scale(0.95);
+}
+
+/* Knob styles */
+.knob-container {
+  position: relative;
+  width: 90px;
+  height: 90px;
+}
+
+.knob-container.clicked::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 3px solid #ff0000;
+  box-shadow: 0 0 12px rgba(255, 0, 0, 0.6);
+  pointer-events: none;
+  animation: pulse-ring 0.3s ease-out;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.fx-knobs .knob-container {
+  width: 100px;
+  height: 100px;
+}
+
+/* Parameter knob (4th knob) is smaller */
+#knob-0-ch4 .knob-container,
+#knob-0-ch5 .knob-container {
+  width: 70px;
+  height: 70px;
+}
+
+.deck-buttons .knob-container {
+  width: 60px;
+  height: 60px;
+}
+
+.knob {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--bg-dark);
+  border: 3px solid var(--knob-track);
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.knob::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 20px;
+  background: var(--accent);
+  border-radius: 2px;
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.knob-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.knob-progress {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--knob-fill) 0deg,
+    var(--knob-fill) var(--progress, 0deg),
+    transparent var(--progress, 0deg),
+    transparent 360deg
+  );
+  mask: radial-gradient(circle, transparent 58%, black 58%);
+  -webkit-mask: radial-gradient(circle, transparent 58%, black 58%);
+}
+
+@media (max-width: 1200px) {
+  .controller {
+    grid-template-columns: 1fr;
+  }
+}
