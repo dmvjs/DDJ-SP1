@@ -10,6 +10,13 @@ export class UIRenderer {
       'knob-2-ch4', 'knob-4-ch4', 'knob-6-ch4',
       'knob-2-ch5', 'knob-4-ch5', 'knob-6-ch5'
     ]);
+
+    // Limited-range knobs (BEATS, AUTO LOOP, center browser) - scale for more visual movement
+    this.limitedRangeKnobs = new Set([
+      'knob-0-ch4', 'knob-0-ch5',   // BEATS
+      'knob-23-ch0', 'knob-23-ch1',  // AUTO LOOP
+      'knob-64-ch6'                   // Center browser knob
+    ]);
   }
 
   /**
@@ -30,6 +37,28 @@ export class UIRenderer {
       this.createSlider(control);
     } else {
       this.createKnob(control);
+    }
+
+    // Add shift stencil label below button (like HOT CUE)
+    if (definition.id === 'button-101-ch6') {
+      const shiftLabel = document.createElement('div');
+      shiftLabel.className = 'shift-stencil-label';
+      shiftLabel.textContent = 'VIEW';
+      control.appendChild(shiftLabel);
+    }
+
+    if (definition.id === 'button-103-ch6') {
+      const shiftLabel = document.createElement('div');
+      shiftLabel.className = 'shift-stencil-label';
+      shiftLabel.textContent = 'AREA';
+      control.appendChild(shiftLabel);
+    }
+
+    if (definition.id === 'button-114-ch2') {
+      const shiftLabel = document.createElement('div');
+      shiftLabel.className = 'shift-stencil-label panel-select-stencil';
+      shiftLabel.textContent = '← PANEL SELECT →';
+      control.appendChild(shiftLabel);
     }
 
     control.appendChild(label);
@@ -195,9 +224,12 @@ export class UIRenderer {
     valueElement.textContent = value;
 
     // FX knobs use 7:00 to 5:00 range (-150° to +150°, 300° total)
+    // Limited-range knobs use 9x multiplier for more visible movement
     let degrees;
     if (this.fxKnobs.has(id)) {
       degrees = -150 + (value / 127) * 300;
+    } else if (this.limitedRangeKnobs.has(id)) {
+      degrees = (value / 127) * 360 * 9;
     } else {
       degrees = (value / 127) * 360;
     }

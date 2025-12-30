@@ -150,9 +150,24 @@ export class DeviceManager extends EventEmitter {
                         const mainDeckAssigned = this.stateManager.isFXAssigned(base.fx, base.baseDeck);
                         const altDeck = base.baseDeck === 1 ? 3 : 4;
                         const altDeckAssigned = this.stateManager.isFXAssigned(base.fx, altDeck);
-                        // Set LED based on current deck assignment
-                        const isCurrentDeckAssigned = this.stateManager.isFXAssigned(mapping.fx, mapping.deck);
-                        this.setLED(msg.channel, msg.note, isCurrentDeckAssigned ? 127 : 0);
+                        // Set button LED (main deck 1/2) and light indicator LED (alt deck 3/4)
+                        // Button notes: 76, 77, 80, 81
+                        // Light notes:  90, 92, 91, 93 (from spec: 11L, 11R, 12L, 12R)
+                        const lightNoteMapping = {
+                            76: 90, // Left 1:  FX1→Deck1 button, FX1→Deck3 light (11L) ✓
+                            77: 91, // Right 1: FX1→Deck2 button, FX1→Deck4 light (was transposed)
+                            80: 92, // Left 2:  FX2→Deck1 button, FX2→Deck3 light (was transposed)
+                            81: 93, // Right 2: FX2→Deck2 button, FX2→Deck4 light (12R)
+                        };
+                        // Set button LED based on main deck (1/2) assignment
+                        this.setLED(msg.channel, msg.note, mainDeckAssigned ? 127 : 0);
+                        console.log(`💡 Button LED: ch${msg.channel} note${msg.note} = ${mainDeckAssigned ? 'ON' : 'OFF'}`);
+                        // Set light indicator LED based on alt deck (3/4) assignment
+                        const lightNote = lightNoteMapping[msg.note];
+                        if (lightNote) {
+                            this.setLED(msg.channel, lightNote, altDeckAssigned ? 127 : 0);
+                            console.log(`🔴 Light LED: ch${msg.channel} note${lightNote} = ${altDeckAssigned ? 'ON' : 'OFF'}`);
+                        }
                         // Emit event with both deck states
                         const event = {
                             type: 'button',
