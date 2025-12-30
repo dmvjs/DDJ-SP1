@@ -107,6 +107,13 @@ This structure reduces duplication, improves maintainability, and makes theme ch
 
 ### Running the Application
 
+**Quick Start:**
+```bash
+npm start
+```
+This builds the project and starts the web server on http://localhost:3000. Plug in your DDJ-SP1 and the UI will update in real-time as you interact with the controller.
+
+**CLI Mode:**
 ```bash
 npm run build
 node dist/index.js
