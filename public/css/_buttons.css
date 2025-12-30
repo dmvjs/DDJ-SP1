@@ -107,9 +107,9 @@
 #button-80-ch6.active::after,
 #button-77-ch6.active::after,
 #button-81-ch6.active::after {
-  background: var(--accent-red);
-  border-color: var(--accent-red);
-  box-shadow: 0 0 8px var(--glow-red);
+  background: var(--accent-orange);
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 8px var(--glow-orange);
 }
 
 /* Number labels "3" and "4" */
@@ -147,7 +147,7 @@
   background: var(--button-off);
 }
 
-/* Black inset for stencil */
+/* Black inset for stencil - no gradient */
 #button-114-ch2 .button::before,
 #button-114-ch3 .button::before {
   content: '';
@@ -186,6 +186,7 @@
   font-weight: var(--font-weight-black);
   letter-spacing: var(--letter-spacing-normal);
   color: var(--button-off);
+  background: transparent;
   mix-blend-mode: lighten;
   z-index: var(--z-stencil-text);
   pointer-events: none;
@@ -193,14 +194,14 @@
 
 #button-114-ch2 .button.active,
 #button-114-ch3 .button.active {
-  background: var(--accent-blue);
-  border-color: var(--accent-blue);
-  box-shadow: var(--shadow-glow-blue);
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  box-shadow: var(--shadow-glow-green);
 }
 
 #button-114-ch2 .button.active::after,
 #button-114-ch3 .button.active::after {
-  color: var(--accent-blue);
+  color: var(--accent-green);
 }
 
 #button-114-ch2 .control-label,

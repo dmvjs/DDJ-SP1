@@ -12,12 +12,14 @@
   --accent-red: #ff4444;
   --accent-blue: #4488ff;
   --accent-orange: #ff8800;
+  --accent-green: #9ACD32;
   --accent-white: #ffffff;
 
   /* Glow Effects */
   --glow-red: rgba(255, 68, 68, 0.4);
   --glow-blue: rgba(68, 136, 255, 0.4);
   --glow-orange: rgba(255, 136, 0, 0.4);
+  --glow-green: rgba(154, 205, 50, 0.4);
 
   /* Text Colors */
   --text-primary: #ffffff;
@@ -98,6 +100,7 @@
   --shadow-glow-red: 0 0 20px var(--glow-red), 0 4px 12px rgba(0, 0, 0, 0.3);
   --shadow-glow-blue: 0 0 20px var(--glow-blue), 0 4px 12px rgba(0, 0, 0, 0.3);
   --shadow-glow-orange: 0 0 20px var(--glow-orange), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-glow-green: 0 0 20px var(--glow-green), 0 4px 12px rgba(0, 0, 0, 0.3);
 
   /* Inset Shadows */
   --shadow-inset-sm: inset 0 1px 3px rgba(0, 0, 0, 0.6);

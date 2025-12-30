@@ -6,6 +6,8 @@ export interface ButtonEvent {
   button: number;
   pressed: boolean;
   channel: number;
+  mainDeckAssigned?: boolean; // For FX ASSIGN: true if assigned to Deck 1/2
+  altDeckAssigned?: boolean;  // For FX ASSIGN: true if assigned to Deck 3/4
 }
 
 /**

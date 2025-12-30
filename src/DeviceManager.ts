@@ -127,6 +127,9 @@ export class DeviceManager extends EventEmitter {
       // Check if this is an FX ASSIGN button
       const isFXAssignButton = this.stateManager.isFXAssignButton(msg.channel, msg.note);
 
+      // Check if this is a DECK button (DECK 1/3 or DECK 2/4)
+      const isDeckButton = this.stateManager.isDeckButton(msg.channel, msg.note);
+
       // Check if this is a shifted FX button
       const isShiftedFX = this.stateManager.isShiftedFXNote(msg.note, msg.channel);
 
@@ -150,17 +153,72 @@ export class DeviceManager extends EventEmitter {
       // Check if this is an FX button
       const isFXButton = this.stateManager.isFXButton(originalChannel, originalNote);
 
-      // Handle FX ASSIGN button press (toggle assignment)
-      if (isFXAssignButton && msg.velocity > 0) {
+      // Handle FX ASSIGN button press/release (toggle assignment)
+      if (isFXAssignButton) {
         const mapping = this.stateManager.getFXAssignMapping(msg.note);
         if (mapping) {
-          const nowAssigned = this.stateManager.toggleFXAssignment(mapping.fx, mapping.deck);
+          // Only toggle on button press, not release
+          if (msg.velocity > 0) {
+            const nowAssigned = this.stateManager.toggleFXAssignment(mapping.fx, mapping.deck);
+            console.log('🎛️  FX ASSIGN:', `FX${mapping.fx}→Deck${mapping.deck}`, nowAssigned ? 'ON' : 'OFF', `LED: ch${msg.channel} note${msg.note}`);
+          }
 
-          // Try LEDs on channel 4 with same note numbers
-          this.setLED(4, msg.note, nowAssigned ? 127 : 0);
+          // Check BOTH main deck and alt deck assignments
+          // Get the base deck (1 or 2) from the button
+          const baseMapping: Record<number, { fx: number; baseDeck: number }> = {
+            76: { fx: 1, baseDeck: 1 },
+            80: { fx: 2, baseDeck: 1 },
+            77: { fx: 1, baseDeck: 2 },
+            81: { fx: 2, baseDeck: 2 },
+          };
+          const base = baseMapping[msg.note];
 
-          console.log('🎛️  FX ASSIGN:', `FX${mapping.fx}→Deck${mapping.deck}`, nowAssigned ? 'ON' : 'OFF', `LED: ch4 note${msg.note}`);
+          if (base) {
+            const mainDeckAssigned = this.stateManager.isFXAssigned(base.fx, base.baseDeck);
+            const altDeck = base.baseDeck === 1 ? 3 : 4;
+            const altDeckAssigned = this.stateManager.isFXAssigned(base.fx, altDeck);
+
+            // Set LED based on current deck assignment
+            const isCurrentDeckAssigned = this.stateManager.isFXAssigned(mapping.fx, mapping.deck);
+            this.setLED(msg.channel, msg.note, isCurrentDeckAssigned ? 127 : 0);
+
+            // Emit event with both deck states
+            const event: ControllerEvent = {
+              type: 'button',
+              button: msg.note,
+              pressed: mainDeckAssigned || altDeckAssigned,
+              channel: msg.channel,
+              mainDeckAssigned,
+              altDeckAssigned
+            };
+            this.emit('event', event);
+            this.emit('button', event);
+            return; // Skip normal event emission
+          }
         }
+      }
+      // Handle DECK button press/release (toggle state)
+      else if (isDeckButton) {
+        // Only toggle on button press, not release
+        if (msg.velocity > 0) {
+          const nowOn = this.stateManager.toggleDeckButton(msg.channel, msg.note);
+          console.log('🎚️  DECK BUTTON:', `ch${msg.channel} note${msg.note}`, nowOn ? 'ON' : 'OFF');
+        }
+
+        // Always set LED and emit event based on current toggle state, not velocity
+        const isOn = this.stateManager.isDeckButtonOn(msg.channel, msg.note);
+        this.setLED(msg.channel, msg.note, isOn ? 127 : 0);
+
+        // Emit event with toggle state instead of press state
+        const event: ControllerEvent = {
+          type: 'button',
+          button: msg.note,
+          pressed: isOn,
+          channel: msg.channel
+        };
+        this.emit('event', event);
+        this.emit('button', event);
+        return; // Skip normal event emission
       }
       // Handle shifted FX button press (toggle lock)
       else if (isShiftedFX) {

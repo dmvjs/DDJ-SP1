@@ -18,6 +18,7 @@ export class ControlStateManager {
   private shiftPressed: boolean = false;
   private lockedButtons: Map<string, boolean> = new Map();
   private fxAssignments: Map<string, boolean> = new Map(); // key: "fx:deck" (e.g., "1:1" = FX1→Deck1)
+  private deckButtonStates: Map<string, boolean> = new Map(); // key: "channel:note" for DECK buttons
 
   // Map shifted note numbers to their unshifted equivalents
   private readonly shiftedNoteMap: Map<number, number> = new Map([
@@ -113,16 +114,40 @@ export class ControlStateManager {
 
   /**
    * Get FX unit and deck from FX ASSIGN button note
-   * @returns {fx, deck} or null if not an FX ASSIGN button
+   * Takes into account DECK 3/4 button states to determine target deck
+   * @returns {fx, deck, isAltDeck} or null if not an FX ASSIGN button
    */
-  getFXAssignMapping(note: number): { fx: number; deck: number } | null {
-    const mapping: Record<number, { fx: number; deck: number }> = {
-      76: { fx: 1, deck: 1 }, // FX1 → Deck 1
-      80: { fx: 2, deck: 1 }, // FX2 → Deck 1
-      77: { fx: 1, deck: 2 }, // FX1 → Deck 2
-      81: { fx: 2, deck: 2 }, // FX2 → Deck 2
+  getFXAssignMapping(note: number): { fx: number; deck: number; isAltDeck: boolean } | null {
+    // Base mapping (Deck 1 or 2)
+    const baseMapping: Record<number, { fx: number; baseDeck: number }> = {
+      76: { fx: 1, baseDeck: 1 }, // Left side, top button
+      80: { fx: 2, baseDeck: 1 }, // Left side, bottom button
+      77: { fx: 1, baseDeck: 2 }, // Right side, top button
+      81: { fx: 2, baseDeck: 2 }, // Right side, bottom button
     };
-    return mapping[note] || null;
+
+    const base = baseMapping[note];
+    if (!base) return null;
+
+    // Check if DECK 3/4 button is active for this side
+    const isDeck3Active = this.isDeckButtonOn(2, 114); // DECK 1/3 button
+    const isDeck4Active = this.isDeckButtonOn(3, 114); // DECK 2/4 button
+
+    let targetDeck = base.baseDeck;
+    let isAltDeck = false;
+
+    // If left side (deck 1) and DECK 3 is active, target deck 3
+    if (base.baseDeck === 1 && isDeck3Active) {
+      targetDeck = 3;
+      isAltDeck = true;
+    }
+    // If right side (deck 2) and DECK 4 is active, target deck 4
+    else if (base.baseDeck === 2 && isDeck4Active) {
+      targetDeck = 4;
+      isAltDeck = true;
+    }
+
+    return { fx: base.fx, deck: targetDeck, isAltDeck };
   }
 
   /**
@@ -143,6 +168,33 @@ export class ControlStateManager {
   isFXAssigned(fx: number, deck: number): boolean {
     const key = `${fx}:${deck}`;
     return this.fxAssignments.get(key) || false;
+  }
+
+  /**
+   * Check if a button is a DECK button (channel 2 or 3, note 114)
+   */
+  isDeckButton(channel: number, note: number): boolean {
+    return (channel === 2 || channel === 3) && note === 114;
+  }
+
+  /**
+   * Toggle DECK button state
+   * @returns new state (true = on, false = off)
+   */
+  toggleDeckButton(channel: number, note: number): boolean {
+    const key = `${channel}:${note}`;
+    const wasOn = this.deckButtonStates.get(key) || false;
+    const nowOn = !wasOn;
+    this.deckButtonStates.set(key, nowOn);
+    return nowOn;
+  }
+
+  /**
+   * Check if a DECK button is currently on
+   */
+  isDeckButtonOn(channel: number, note: number): boolean {
+    const key = `${channel}:${note}`;
+    return this.deckButtonStates.get(key) || false;
   }
 
   /**

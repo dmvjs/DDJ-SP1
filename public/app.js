@@ -77,7 +77,7 @@ function handleButtonEvent(control, event) {
   const isLocked = state.isButtonLocked(lockKey);
 
   state.updateButton(control.id, event.pressed);
-  ui.updateButton(control.element, event.pressed, isLocked);
+  ui.updateButton(control.element, event.pressed, isLocked, event.mainDeckAssigned, event.altDeckAssigned);
 }
 
 /**

@@ -131,15 +131,54 @@ export class UIRenderer {
 
   /**
    * Update button visual state
+   * @param {HTMLElement} element - The control container element
+   * @param {boolean} pressed - Whether the button is pressed/active
+   * @param {boolean} isLocked - Whether the button is locked
+   * @param {boolean} mainDeckAssigned - For FX ASSIGN: true if assigned to Deck 1/2
+   * @param {boolean} altDeckAssigned - For FX ASSIGN: true if assigned to Deck 3/4
    */
-  updateButton(element, pressed, isLocked = false) {
+  updateButton(element, pressed, isLocked = false, mainDeckAssigned = false, altDeckAssigned = false) {
     const button = element.querySelector('.button');
     if (!button) return;
 
-    if (pressed) {
-      button.classList.add('active');
-    } else if (!isLocked) {
-      button.classList.remove('active');
+    const isFXAssignButton = element.id.includes('button-76-ch6') ||
+                            element.id.includes('button-77-ch6') ||
+                            element.id.includes('button-80-ch6') ||
+                            element.id.includes('button-81-ch6');
+
+    const isDeckButton = element.id.includes('button-114-ch2') ||
+                        element.id.includes('button-114-ch3');
+
+    if (isFXAssignButton) {
+      // For FX ASSIGN buttons, show both indicators independently
+      // Button shows main deck (1/2), container shows alt deck (3/4)
+      if (mainDeckAssigned) {
+        button.classList.add('active');
+      } else if (!isLocked) {
+        button.classList.remove('active');
+      }
+
+      if (altDeckAssigned) {
+        element.classList.add('active');
+      } else if (!isLocked) {
+        element.classList.remove('active');
+      }
+    } else if (isDeckButton) {
+      // DECK buttons: light up both button and container
+      if (pressed) {
+        button.classList.add('active');
+        element.classList.add('active');
+      } else if (!isLocked) {
+        button.classList.remove('active');
+        element.classList.remove('active');
+      }
+    } else {
+      // Regular buttons: just light up the button
+      if (pressed) {
+        button.classList.add('active');
+      } else if (!isLocked) {
+        button.classList.remove('active');
+      }
     }
   }
 
@@ -203,10 +242,26 @@ export class UIRenderer {
     const button = element.querySelector('.button');
     if (!button) return;
 
+    // For FX ASSIGN buttons (76, 77, 80, 81) and DECK buttons (114),
+    // add active class to container for light indicators
+    const isFXAssignButton = element.id.includes('button-76-ch6') ||
+                            element.id.includes('button-77-ch6') ||
+                            element.id.includes('button-80-ch6') ||
+                            element.id.includes('button-81-ch6');
+
+    const isDeckButton = element.id.includes('button-114-ch2') ||
+                        element.id.includes('button-114-ch3');
+
     if (locked) {
       button.classList.add('active');
+      if (isFXAssignButton || isDeckButton) {
+        element.classList.add('active');
+      }
     } else {
       button.classList.remove('active');
+      if (isFXAssignButton || isDeckButton) {
+        element.classList.remove('active');
+      }
     }
   }
 
