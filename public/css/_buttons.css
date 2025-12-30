@@ -1,0 +1,878 @@
+/* ============================================
+   Button Styles
+   ============================================ */
+
+/* ====== Base Button Styles ====== */
+.button {
+  width: 100%;
+  aspect-ratio: 1;
+  min-height: var(--button-height-2xl);
+  border-radius: var(--radius-lg);
+  background: var(--button-off);
+  border: var(--border-width-md) solid var(--border-color-light);
+  transition: all var(--transition-normal);
+  cursor: pointer;
+  position: relative;
+  box-shadow: var(--shadow-md);
+}
+
+.button::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: var(--radius-full);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.button.active {
+  background: var(--button-on);
+  border-color: var(--accent-red);
+  box-shadow: var(--shadow-glow-red);
+  transform: scale(0.95);
+}
+
+/* Remove circular gradient from specific buttons */
+#button-101-ch6 .button::after,
+#button-103-ch6 .button::after,
+#button-64-ch6 .button::after {
+  display: none;
+}
+
+/* ====== Deck Selection Buttons ====== */
+#button-76-ch6,
+#button-80-ch6,
+#button-77-ch6,
+#button-81-ch6 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  position: relative;
+}
+
+#button-76-ch6 .button,
+#button-80-ch6 .button,
+#button-77-ch6 .button,
+#button-81-ch6 .button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Button labels "1" and "2" */
+#button-76-ch6 .button::before,
+#button-80-ch6 .button::before {
+  content: '1';
+}
+
+#button-77-ch6 .button::before,
+#button-81-ch6 .button::before {
+  content: '2';
+}
+
+#button-76-ch6 .button::before,
+#button-80-ch6 .button::before,
+#button-77-ch6 .button::before,
+#button-81-ch6 .button::before {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--accent-white);
+  z-index: var(--z-stencil-text);
+}
+
+#button-76-ch6 .button::after,
+#button-80-ch6 .button::after,
+#button-77-ch6 .button::after,
+#button-81-ch6 .button::after {
+  display: none;
+}
+
+/* Light indicators */
+#button-76-ch6::after,
+#button-80-ch6::after,
+#button-77-ch6::after,
+#button-81-ch6::after {
+  content: '';
+  width: 100%;
+  height: 6px;
+  background: var(--bg-light);
+  border: var(--border-width-sm) solid var(--border-color-dark);
+  border-radius: var(--radius-sm);
+  margin-top: 6px;
+  box-shadow: var(--shadow-inset-sm);
+}
+
+#button-76-ch6.active::after,
+#button-80-ch6.active::after,
+#button-77-ch6.active::after,
+#button-81-ch6.active::after {
+  background: var(--accent-red);
+  border-color: var(--accent-red);
+  box-shadow: 0 0 8px var(--glow-red);
+}
+
+/* Number labels "3" and "4" */
+.center-row-4::before,
+.center-row-4::after {
+  position: absolute;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-normal);
+  color: var(--text-secondary);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.center-row-4::before {
+  content: '3';
+  top: 34px;
+}
+
+.center-row-4::after {
+  content: '4';
+  bottom: 13px;
+}
+
+/* Hide default labels */
+#button-76-ch6 .control-label,
+#button-80-ch6 .control-label,
+#button-77-ch6 .control-label,
+#button-81-ch6 .control-label {
+  display: none;
+}
+
+/* ====== DECK Buttons (3 and 4) ====== */
+#button-114-ch2 .button,
+#button-114-ch3 .button {
+  background: var(--button-off);
+}
+
+/* Black inset for stencil */
+#button-114-ch2 .button::before,
+#button-114-ch3 .button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 4px;
+  right: 4px;
+  height: 16px;
+  background: var(--stencil-bg-black);
+  border-radius: var(--stencil-border-radius);
+  box-shadow: var(--shadow-inset-md);
+  z-index: var(--z-stencil-bg);
+  pointer-events: none;
+}
+
+/* Stencil numbers */
+#button-114-ch2 .button::after {
+  content: '3';
+}
+
+#button-114-ch3 .button::after {
+  content: '4';
+}
+
+#button-114-ch2 .button::after,
+#button-114-ch3 .button::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-black);
+  letter-spacing: var(--letter-spacing-normal);
+  color: var(--button-off);
+  mix-blend-mode: lighten;
+  z-index: var(--z-stencil-text);
+  pointer-events: none;
+}
+
+#button-114-ch2 .button.active,
+#button-114-ch3 .button.active {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  box-shadow: var(--shadow-glow-blue);
+}
+
+#button-114-ch2 .button.active::after,
+#button-114-ch3 .button.active::after {
+  color: var(--accent-blue);
+}
+
+#button-114-ch2 .control-label,
+#button-114-ch3 .control-label {
+  display: none;
+}
+
+/* ====== LOAD Buttons ====== */
+#button-70-ch6 .button,
+#button-71-ch6 .button {
+  height: var(--button-height-lg);
+  background: var(--button-off);
+}
+
+#button-70-ch6 .button::before,
+#button-71-ch6 .button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 4px;
+  right: 4px;
+  height: 20px;
+  background: var(--stencil-bg-black);
+  border-radius: var(--stencil-border-radius);
+  box-shadow: var(--shadow-inset-md);
+  z-index: var(--z-stencil-bg);
+  pointer-events: none;
+}
+
+#button-70-ch6 .button::after,
+#button-71-ch6 .button::after {
+  content: 'LOAD';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-black);
+  letter-spacing: var(--letter-spacing-normal);
+  color: var(--button-off);
+  mix-blend-mode: lighten;
+  z-index: var(--z-stencil-text);
+  pointer-events: none;
+  width: 100%;
+  text-align: center;
+  background: none;
+  border-radius: 0;
+}
+
+#button-70-ch6 .button.active,
+#button-71-ch6 .button.active {
+  background: var(--accent-red);
+  border-color: var(--accent-red);
+  box-shadow: var(--shadow-glow-red);
+}
+
+#button-70-ch6 .button.active::after,
+#button-71-ch6 .button.active::after {
+  color: var(--accent-red);
+}
+
+#button-70-ch6 .control-label,
+#button-71-ch6 .control-label {
+  display: none;
+}
+
+/* ====== SHIFT Button ====== */
+#button-64-ch6 .button {
+  background: var(--button-off);
+}
+
+#button-64-ch6 .control-label {
+  display: none;
+}
+
+/* White inset for stencil */
+#button-64-ch6 .button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 4px;
+  right: 4px;
+  height: 16px;
+  background: var(--stencil-bg-white);
+  border-radius: var(--stencil-border-radius);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  z-index: var(--z-stencil-bg);
+  pointer-events: none;
+}
+
+/* SHIFT text */
+#button-64-ch6 .button::after {
+  content: 'SHIFT';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-heavy);
+  color: var(--text-tertiary);
+  text-shadow: none;
+  letter-spacing: var(--letter-spacing-wide);
+  mix-blend-mode: multiply;
+  z-index: var(--z-stencil-text);
+  pointer-events: none;
+}
+
+#button-64-ch6 .button.active {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  box-shadow: var(--shadow-glow-blue);
+}
+
+#button-64-ch6 .button.active::after {
+  color: var(--accent-blue);
+}
+
+/* ====== SYNC Buttons ====== */
+#button-88-ch0 .button,
+#button-88-ch1 .button {
+  width: var(--button-height-3xl);
+  height: var(--button-height-3xl);
+  border-radius: var(--radius-full);
+  background: var(--button-off);
+}
+
+/* Circular inset stencil */
+#button-88-ch0 .button::before,
+#button-88-ch1 .button::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  background: var(--stencil-bg-black);
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+  z-index: var(--z-stencil-bg);
+  pointer-events: none;
+}
+
+/* OFF box indicator */
+#button-88-ch0 .button::after,
+#button-88-ch1 .button::after {
+  content: '';
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 11px;
+  background: var(--text-secondary);
+  border: var(--border-width-md) solid #999999;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), var(--shadow-sm);
+  z-index: 6;
+  pointer-events: none;
+}
+
+#button-88-ch0 .button.active::after,
+#button-88-ch1 .button.active::after {
+  background: #6699ff;
+  border-color: #77aaff;
+}
+
+/* SYNC button text labels */
+.stencil-text {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: var(--font-weight-black);
+  letter-spacing: var(--letter-spacing-normal);
+  color: var(--button-off);
+  mix-blend-mode: lighten;
+  z-index: var(--z-stencil-text);
+  pointer-events: none;
+  text-align: center;
+  background: none;
+}
+
+.stencil-text-top {
+  top: 13px;
+  font-size: var(--font-size-2xl);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.stencil-text-bottom {
+  bottom: 10px;
+  font-size: var(--font-size-md);
+  z-index: 7;
+  color: #000000;
+  mix-blend-mode: normal;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.3);
+  font-weight: var(--font-weight-black);
+}
+
+#button-88-ch0 .button.active .stencil-text-top,
+#button-88-ch1 .button.active .stencil-text-top {
+  color: var(--accent-blue);
+}
+
+#button-88-ch0 .button.active .stencil-text-bottom,
+#button-88-ch1 .button.active .stencil-text-bottom {
+  color: #000000;
+}
+
+#button-88-ch0 .control-label,
+#button-88-ch1 .control-label {
+  display: none;
+}
+
+/* ====== FX Buttons (FX 1, 2, 3) ====== */
+#button-71-ch4 .button,
+#button-72-ch4 .button,
+#button-73-ch4 .button,
+#button-71-ch5 .button,
+#button-72-ch5 .button,
+#button-73-ch5 .button {
+  height: var(--button-height-md);
+  border-radius: 6px;
+  background: var(--button-off);
+}
+
+#button-71-ch4 .button.active,
+#button-72-ch4 .button.active,
+#button-73-ch4 .button.active,
+#button-71-ch5 .button.active,
+#button-72-ch5 .button.active,
+#button-73-ch5 .button.active {
+  background: var(--accent-red);
+  border-color: var(--accent-red);
+  box-shadow: var(--shadow-glow-red);
+}
+
+/* FX buttons layout - ON + FX SELECT */
+#button-71-ch4 .button,
+#button-72-ch4 .button,
+#button-73-ch4 .button,
+#button-74-ch4 .button,
+#button-71-ch5 .button,
+#button-72-ch5 .button,
+#button-73-ch5 .button,
+#button-74-ch5 .button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 4px;
+}
+
+/* "ON" text on the left */
+.fx-on-text {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-heavy);
+  color: #000000;
+}
+
+/* "FX SELECT" container with stencil */
+.fx-select-stencil {
+  flex: 1;
+  margin-left: 4px;
+  position: relative;
+  background: var(--stencil-bg-black);
+  border-radius: var(--stencil-border-radius);
+  box-shadow: var(--shadow-inset-md);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 2px 5px;
+}
+
+/* FX SELECT text with cutout effect */
+.fx-select-stencil::after {
+  content: 'FX SELECT';
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-black);
+  color: var(--button-off);
+  letter-spacing: var(--letter-spacing-normal);
+  mix-blend-mode: lighten;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+/* FX MODE text for TAP buttons */
+.fx-mode-stencil::after {
+  content: 'FX MODE';
+}
+
+/* Text turns red when active */
+#button-71-ch4 .button.active .fx-select-stencil::after,
+#button-72-ch4 .button.active .fx-select-stencil::after,
+#button-73-ch4 .button.active .fx-select-stencil::after,
+#button-74-ch4 .button.active .fx-select-stencil::after,
+#button-71-ch5 .button.active .fx-select-stencil::after,
+#button-72-ch5 .button.active .fx-select-stencil::after,
+#button-73-ch5 .button.active .fx-select-stencil::after,
+#button-74-ch5 .button.active .fx-select-stencil::after {
+  color: var(--accent-red);
+}
+
+/* Hide labels for FX buttons */
+#button-71-ch4 .control-label,
+#button-72-ch4 .control-label,
+#button-73-ch4 .control-label,
+#button-74-ch4 .control-label,
+#button-67-ch4 .control-label,
+#button-71-ch5 .control-label,
+#button-72-ch5 .control-label,
+#button-73-ch5 .control-label,
+#button-74-ch5 .control-label,
+#button-67-ch5 .control-label {
+  display: none;
+}
+
+/* ====== FX ASSIGN Buttons ====== */
+#button-74-ch4 .button,
+#button-74-ch5 .button {
+  height: var(--button-height-md);
+  border-radius: 6px;
+}
+
+#button-74-ch4 .button.active,
+#button-74-ch5 .button.active {
+  background: var(--accent-orange);
+  border-color: var(--accent-orange);
+  box-shadow: var(--shadow-glow-orange);
+}
+
+/* ====== Pad Mode Buttons ====== */
+#button-27-ch0 .button,
+#button-30-ch0 .button,
+#button-32-ch0 .button,
+#button-34-ch0 .button,
+#button-27-ch1 .button,
+#button-30-ch1 .button,
+#button-32-ch1 .button,
+#button-34-ch1 .button {
+  height: var(--button-height-lg);
+  background: var(--button-off);
+}
+
+/* Black inset for stencil */
+#button-27-ch0 .button::before,
+#button-30-ch0 .button::before,
+#button-32-ch0 .button::before,
+#button-34-ch0 .button::before,
+#button-27-ch1 .button::before,
+#button-30-ch1 .button::before,
+#button-32-ch1 .button::before,
+#button-34-ch1 .button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 4px;
+  right: 4px;
+  height: 20px;
+  background: var(--stencil-bg-black);
+  border-radius: var(--stencil-border-radius);
+  box-shadow: var(--shadow-inset-md);
+  z-index: var(--z-stencil-bg);
+  pointer-events: none;
+}
+
+/* Pad mode text */
+#button-27-ch0 .button::after,
+#button-27-ch1 .button::after {
+  content: 'HOT CUE';
+}
+
+#button-30-ch0 .button::after,
+#button-30-ch1 .button::after {
+  content: 'ROLL';
+}
+
+#button-32-ch0 .button::after,
+#button-32-ch1 .button::after {
+  content: 'SLICER';
+}
+
+#button-34-ch0 .button::after,
+#button-34-ch1 .button::after {
+  content: 'SAMPLER';
+}
+
+#button-27-ch0 .button::after,
+#button-30-ch0 .button::after,
+#button-32-ch0 .button::after,
+#button-34-ch0 .button::after,
+#button-27-ch1 .button::after,
+#button-30-ch1 .button::after,
+#button-32-ch1 .button::after,
+#button-34-ch1 .button::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-black);
+  letter-spacing: var(--letter-spacing-normal);
+  color: var(--button-off);
+  mix-blend-mode: lighten;
+  z-index: var(--z-stencil-text);
+  pointer-events: none;
+  width: 100%;
+  text-align: center;
+  background: none;
+  border-radius: 0;
+}
+
+#button-27-ch0 .button.active::after,
+#button-30-ch0 .button.active::after,
+#button-32-ch0 .button.active::after,
+#button-34-ch0 .button.active::after,
+#button-27-ch1 .button.active::after,
+#button-30-ch1 .button.active::after,
+#button-32-ch1 .button.active::after,
+#button-34-ch1 .button.active::after {
+  color: var(--accent-blue);
+}
+
+#button-27-ch0 .button.active,
+#button-30-ch0 .button.active,
+#button-32-ch0 .button.active,
+#button-34-ch0 .button.active,
+#button-27-ch1 .button.active,
+#button-30-ch1 .button.active,
+#button-32-ch1 .button.active,
+#button-34-ch1 .button.active {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  box-shadow: var(--shadow-glow-blue);
+}
+
+#button-27-ch0 .control-label,
+#button-30-ch0 .control-label,
+#button-32-ch0 .control-label,
+#button-34-ch0 .control-label,
+#button-27-ch1 .control-label,
+#button-30-ch1 .control-label,
+#button-32-ch1 .control-label,
+#button-34-ch1 .control-label {
+  display: none;
+}
+
+/* Shift labels below pad mode buttons */
+#button-27-ch0::after,
+#button-30-ch0::after,
+#button-32-ch0::after,
+#button-34-ch0::after,
+#button-27-ch1::after,
+#button-30-ch1::after,
+#button-32-ch1::after,
+#button-34-ch1::after {
+  content: '';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--spacing-xs);
+  width: 100%;
+  height: 16px;
+  background: var(--stencil-bg-white);
+  border-radius: var(--stencil-border-radius);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  position: relative;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-heavy);
+  color: var(--text-tertiary);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+#button-27-ch0::after,
+#button-27-ch1::after {
+  content: 'HOT LOOP';
+}
+
+#button-30-ch0::after,
+#button-30-ch1::after {
+  content: 'AUTO LOOP';
+}
+
+#button-32-ch0::after,
+#button-32-ch1::after {
+  content: 'MANUAL LOOP';
+  font-size: var(--font-size-xs);
+}
+
+#button-34-ch0::after,
+#button-34-ch1::after {
+  content: 'VELOCITY';
+}
+
+/* ====== SLIP, CENSOR Buttons ====== */
+#button-64-ch0 .button,
+#button-21-ch0 .button,
+#button-64-ch1 .button,
+#button-21-ch1 .button {
+  height: var(--button-height-lg);
+}
+
+/* Shift labels */
+#button-64-ch0::after,
+#button-64-ch1::after,
+#button-21-ch0::after,
+#button-21-ch1::after {
+  content: '';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--spacing-xs);
+  width: 100%;
+  height: 16px;
+  background: var(--stencil-bg-white);
+  border-radius: var(--stencil-border-radius);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  position: relative;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-heavy);
+  color: var(--text-tertiary);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+#button-64-ch0::after,
+#button-64-ch1::after {
+  content: 'REL.';
+}
+
+#button-21-ch0::after,
+#button-21-ch1::after {
+  content: 'INT.';
+}
+
+/* ====== PARAM Buttons (Disabled) ====== */
+#button-param-left-ch0,
+#button-param-right-ch0,
+#button-param-left-ch1,
+#button-param-right-ch1 {
+  grid-column: span 1;
+  align-self: start;
+  pointer-events: none;
+  position: relative;
+}
+
+#button-param-left-ch0 .button,
+#button-param-right-ch0 .button,
+#button-param-left-ch1 .button,
+#button-param-right-ch1 .button {
+  height: var(--button-height-lg);
+  background: var(--bg-medium);
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+#button-param-left-ch0 .button::before,
+#button-param-left-ch1 .button::before {
+  content: '◀';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: var(--font-size-3xl);
+  color: var(--accent-white);
+  z-index: var(--z-stencil-text);
+}
+
+#button-param-right-ch0 .button::before,
+#button-param-right-ch1 .button::before {
+  content: '▶';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: var(--font-size-3xl);
+  color: var(--accent-white);
+  z-index: var(--z-stencil-text);
+}
+
+/* PARAM. 2 shift label */
+#button-param-left-ch0::after,
+#button-param-left-ch1::after {
+  content: 'PARAM. 2';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(200% + var(--spacing-md));
+  height: 16px;
+  background: var(--stencil-bg-white);
+  border-radius: var(--stencil-border-radius);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  position: absolute;
+  bottom: -29px;
+  left: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-heavy);
+  color: var(--text-tertiary);
+  letter-spacing: var(--letter-spacing-normal);
+  opacity: 0.3;
+}
+
+#button-param-right-ch0::after,
+#button-param-right-ch1::after {
+  display: none;
+}
+
+/* Position left PARAM.1 label to span both buttons */
+#button-param-left-ch0 .control-label,
+#button-param-left-ch1 .control-label {
+  position: relative;
+  left: calc(50% + 0.375rem);
+}
+
+#button-param-right-ch0 .control-label,
+#button-param-right-ch1 .control-label {
+  visibility: hidden;
+}
+
+/* ====== Grid Positioning ====== */
+/* FX buttons - Row 1 */
+#button-71-ch4,
+#button-72-ch4,
+#button-73-ch4,
+#button-74-ch4,
+#button-71-ch5,
+#button-72-ch5,
+#button-73-ch5,
+#button-74-ch5 {
+  grid-column: span 2;
+}
+
+/* SYNC buttons - Row 2 */
+#button-88-ch0,
+#button-88-ch1 {
+  grid-column: span 2;
+}
+
+/* SLIP, CENSOR, PARAM buttons - Row 2 */
+#button-64-ch0,
+#button-21-ch0,
+#button-64-ch1,
+#button-21-ch1,
+#button-param-left-ch0,
+#button-param-right-ch0,
+#button-param-left-ch1,
+#button-param-right-ch1 {
+  grid-column: span 1;
+  align-self: start;
+}
+
+/* AUTO LOOP knob - Row 2 */
+#knob-23-ch0,
+#knob-23-ch1 {
+  grid-column: span 2;
+}
+
+/* Pad mode buttons - Row 3 */
+#button-27-ch0,
+#button-30-ch0,
+#button-32-ch0,
+#button-34-ch0,
+#button-27-ch1,
+#button-30-ch1,
+#button-32-ch1,
+#button-34-ch1 {
+  grid-column: span 2;
+}

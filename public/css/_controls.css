@@ -1,0 +1,29 @@
+/* ============================================
+   Shared Control Styles
+   ============================================ */
+
+.control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.control-label {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  text-align: center;
+  font-weight: var(--font-weight-normal);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  order: -1;
+}
+
+/* Two-line labels for specific center section buttons */
+#button-65-ch6 .control-label,
+#button-101-ch6 .control-label,
+#button-103-ch6 .control-label {
+  white-space: pre-line;
+  line-height: 1.2;
+  font-size: var(--font-size-base);
+}

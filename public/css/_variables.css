@@ -1,0 +1,132 @@
+/* ============================================
+   CSS Custom Properties (Design Tokens)
+   ============================================ */
+
+:root {
+  /* ====== Color Palette ====== */
+  --bg-dark: #0a0a0a;
+  --bg-medium: #1a1a1a;
+  --bg-light: #2a2a2a;
+
+  /* Accent Colors */
+  --accent-red: #ff4444;
+  --accent-blue: #4488ff;
+  --accent-orange: #ff8800;
+  --accent-white: #ffffff;
+
+  /* Glow Effects */
+  --glow-red: rgba(255, 68, 68, 0.4);
+  --glow-blue: rgba(68, 136, 255, 0.4);
+  --glow-orange: rgba(255, 136, 0, 0.4);
+
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #888888;
+  --text-tertiary: #333333;
+
+  /* Button States */
+  --button-off: #333333;
+  --button-on: var(--accent-red);
+
+  /* Control Track Colors */
+  --knob-track: #333333;
+  --knob-fill: var(--accent-red);
+  --slider-track: #000000;
+
+  /* ====== Spacing ====== */
+  --spacing-xs: 0.3rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 0.75rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1.5rem;
+  --spacing-2xl: 2rem;
+
+  /* ====== Border Radius ====== */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 50%;
+
+  /* ====== Typography ====== */
+  --font-size-xs: 0.45rem;
+  --font-size-sm: 0.5rem;
+  --font-size-md: 0.55rem;
+  --font-size-base: 0.6rem;
+  --font-size-lg: 0.65rem;
+  --font-size-xl: 0.7rem;
+  --font-size-2xl: 0.75rem;
+  --font-size-3xl: 0.8rem;
+  --font-size-4xl: 1rem;
+
+  --font-weight-normal: 600;
+  --font-weight-bold: 700;
+  --font-weight-heavy: 800;
+  --font-weight-black: 900;
+
+  --letter-spacing-tight: -0.5px;
+  --letter-spacing-normal: 0.3px;
+  --letter-spacing-wide: 0.5px;
+
+  /* ====== Dimensions ====== */
+  /* Knobs */
+  --knob-size-sm: 60px;
+  --knob-size-md: 90px;
+  --knob-size-lg: 100px;
+  --knob-size-xl: 110px;
+
+  /* Buttons */
+  --button-height-xs: 20px;
+  --button-height-sm: 24px;
+  --button-height-md: 30px;
+  --button-height-lg: 32px;
+  --button-height-xl: 40px;
+  --button-height-2xl: 50px;
+  --button-height-3xl: 56px;
+
+  /* Sliders */
+  --slider-width: 40px;
+  --slider-height: 120px;
+  --slider-track-width: 8px;
+  --slider-thumb-width: 75px;
+  --slider-thumb-height: 24px;
+
+  /* ====== Shadows ====== */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
+  --shadow-glow-red: 0 0 20px var(--glow-red), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-glow-blue: 0 0 20px var(--glow-blue), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-glow-orange: 0 0 20px var(--glow-orange), 0 4px 12px rgba(0, 0, 0, 0.3);
+
+  /* Inset Shadows */
+  --shadow-inset-sm: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  --shadow-inset-md: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  --shadow-inset-lg: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+
+  /* ====== Stencil Effect ====== */
+  --stencil-bg-black: rgba(0, 0, 0, 0.7);
+  --stencil-bg-white: rgba(255, 255, 255, 0.9);
+  --stencil-border-radius: 3px;
+
+  /* ====== Borders ====== */
+  --border-width-sm: 1px;
+  --border-width-md: 2px;
+  --border-width-lg: 3px;
+
+  --border-color-dark: #444;
+  --border-color-medium: #666;
+  --border-color-light: var(--bg-light);
+
+  /* ====== Transitions ====== */
+  --transition-fast: 0.1s ease;
+  --transition-normal: 0.15s ease;
+  --transition-slow: 0.3s ease-out;
+
+  /* ====== Z-Index Layers ====== */
+  --z-base: 1;
+  --z-overlay: 2;
+  --z-stencil-bg: 5;
+  --z-stencil-text: 10;
+  --z-ring: 999;
+}

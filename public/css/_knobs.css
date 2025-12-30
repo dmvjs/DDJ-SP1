@@ -1,0 +1,318 @@
+/* ============================================
+   Knobs & Sliders
+   ============================================ */
+
+/* ====== Base Knob Styles ====== */
+.knob-container {
+  position: relative;
+  width: var(--knob-size-md);
+  height: var(--knob-size-md);
+}
+
+.knob {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--bg-dark);
+  border: var(--border-width-lg) solid var(--knob-track);
+  position: relative;
+  box-shadow: var(--shadow-md), var(--shadow-inset-lg);
+}
+
+.knob::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 20px;
+  background: var(--accent-red);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 10px var(--glow-red);
+}
+
+.knob-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-normal);
+  color: var(--text-primary);
+  text-shadow: var(--shadow-sm);
+}
+
+.knob-progress {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  --progress: 0deg;
+  background: conic-gradient(
+    var(--knob-fill) 0deg,
+    var(--knob-fill) var(--progress),
+    transparent var(--progress),
+    transparent 360deg
+  );
+  mask: radial-gradient(circle, transparent 58%, black 58%);
+  -webkit-mask: radial-gradient(circle, transparent 58%, black 58%);
+}
+
+/* ====== FX Knobs ====== */
+/* Outer white dashed ring - 7:00-5:00 range for FX knobs */
+#knob-2-ch4 .knob-container::before,
+#knob-4-ch4 .knob-container::before,
+#knob-6-ch4 .knob-container::before,
+#knob-2-ch5 .knob-container::before,
+#knob-4-ch5 .knob-container::before,
+#knob-6-ch5 .knob-container::before {
+  content: '' !important;
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  background: conic-gradient(
+    white 0deg,
+    white 50deg,
+    transparent 50deg,
+    transparent 60deg,
+    white 60deg,
+    white 100deg,
+    transparent 100deg,
+    transparent 110deg,
+    white 110deg,
+    white 150deg,
+    transparent 150deg,
+    transparent 210deg,
+    white 210deg,
+    white 250deg,
+    transparent 250deg,
+    transparent 260deg,
+    white 260deg,
+    white 300deg,
+    transparent 300deg,
+    transparent 310deg,
+    white 310deg,
+    white 350deg,
+    transparent 350deg,
+    transparent 360deg
+  ) !important;
+  mask: radial-gradient(circle, transparent 46%, black 46%, black 50%, transparent 50%) !important;
+  -webkit-mask: radial-gradient(circle, transparent 46%, black 46%, black 50%, transparent 50%) !important;
+  pointer-events: none;
+  z-index: var(--z-base);
+}
+
+/* Full ring for BEATS, AUTO LOOP, and BROWSER knobs */
+.fx-knobs #knob-0-ch4 .knob-container::before,
+.fx-knobs #knob-0-ch5 .knob-container::before,
+#knob-23-ch0 .knob-container::before,
+#knob-23-ch1 .knob-container::before,
+#knob-64-ch6 .knob-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  background: conic-gradient(
+    white 0deg 50deg,
+    transparent 50deg 60deg,
+    white 60deg 110deg,
+    transparent 110deg 120deg,
+    white 120deg 170deg,
+    transparent 170deg 180deg,
+    white 180deg 230deg,
+    transparent 230deg 240deg,
+    white 240deg 290deg,
+    transparent 290deg 300deg,
+    white 300deg 350deg,
+    transparent 350deg 360deg
+  );
+  mask: radial-gradient(circle, transparent 46%, black 46%, black 50%, transparent 50%);
+  -webkit-mask: radial-gradient(circle, transparent 46%, black 46%, black 50%, transparent 50%);
+  pointer-events: none;
+  z-index: var(--z-base);
+}
+
+/* Inner solid grey ring for FX knobs */
+.fx-knobs .knob-progress,
+#knob-23-ch0 .knob-progress,
+#knob-23-ch1 .knob-progress,
+#knob-64-ch6 .knob-progress {
+  background: none !important;
+}
+
+.fx-knobs .knob-progress::before,
+#knob-23-ch0 .knob-progress::before,
+#knob-23-ch1 .knob-progress::before,
+#knob-64-ch6 .knob-progress::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: var(--radius-full);
+  border: var(--border-width-lg) solid #999999;
+  pointer-events: none;
+}
+
+/* Black knob handle for FX knobs */
+.fx-knobs .knob,
+#knob-23-ch0 .knob,
+#knob-23-ch1 .knob,
+#knob-64-ch6 .knob {
+  background: #000000;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* White line indicator on handle */
+.fx-knobs .knob::before,
+#knob-23-ch0 .knob::before,
+#knob-23-ch1 .knob::before,
+#knob-64-ch6 .knob::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 40%;
+  background: var(--accent-white);
+  border-radius: 1px;
+  box-shadow: none;
+}
+
+/* Black circle background for value */
+.fx-knobs .knob-value,
+#knob-23-ch0 .knob-value,
+#knob-23-ch1 .knob-value,
+#knob-64-ch6 .knob-value {
+  background: #000000;
+  border-radius: var(--radius-full);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-white);
+  font-size: var(--font-size-3xl);
+  z-index: var(--z-stencil-text);
+}
+
+/* Infinite encoder knobs - hide progress arc */
+#knob-0-ch4 .knob-progress,
+#knob-0-ch5 .knob-progress,
+#knob-64-ch6 .knob-progress {
+  display: none !important;
+}
+
+/* Position marker for infinite encoders */
+#knob-0-ch4 .knob::after,
+#knob-0-ch5 .knob::after,
+#knob-64-ch6 .knob::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 12px;
+  background: var(--accent-white);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  z-index: var(--z-stencil-text);
+}
+
+/* ====== Sliders ====== */
+.slider-container {
+  width: var(--slider-width);
+  height: var(--slider-height);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.slider-track {
+  position: relative;
+  width: var(--slider-track-width);
+  height: 100%;
+  background: var(--slider-track);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.slider-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0%;
+  background: var(--knob-fill);
+  border-radius: var(--radius-md);
+  transition: height var(--transition-fast);
+}
+
+.slider-thumb {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  width: var(--slider-thumb-width);
+  height: var(--slider-thumb-height);
+  background: linear-gradient(to bottom,
+    #000000 0,
+    #000000 33%,
+    #ffffff 33%,
+    #ffffff 67%,
+    #000000 67%,
+    #000000 100%);
+  border: var(--border-width-sm) solid var(--border-color-medium);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: bottom var(--transition-fast);
+  z-index: 3;
+}
+
+/* Slider markers */
+.slider-container::before,
+.slider-container::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 2px;
+  background: var(--accent-white);
+  z-index: var(--z-overlay);
+}
+
+.slider-container::before {
+  top: 0;
+}
+
+.slider-container::after {
+  bottom: 0;
+}
+
+.slider-track::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 2px;
+  background: var(--accent-red);
+  z-index: var(--z-overlay);
+}
+
+.slider-track::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 25%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 2px;
+  background: var(--accent-red);
+  z-index: var(--z-overlay);
+  box-shadow: 0 60px 0 0 var(--accent-red);
+}

@@ -1,0 +1,207 @@
+/* ============================================
+   Layout Structures
+   ============================================ */
+
+/* Main Controller Layout */
+.controller {
+  display: grid;
+  grid-template-columns: 2fr 1fr 2fr;
+  gap: var(--spacing-2xl);
+  background: var(--bg-medium);
+  padding: var(--spacing-2xl);
+  border-radius: var(--spacing-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.deck {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ====== Center Section Layout ====== */
+.center-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.center-section > * {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.center-row-4 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xs) 3rem;
+  width: 200px;
+  padding-bottom: 12px;
+  position: relative;
+}
+
+.center-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem 3rem;
+  width: 200px;
+  position: relative;
+  margin-top: 16px;
+}
+
+/* "DECK" label above buttons */
+.center-row-2::before {
+  content: 'DECK';
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-secondary);
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.center-view-area {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem 3rem;
+  width: 200px;
+}
+
+.center-load {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem 3rem;
+  width: 200px;
+}
+
+#center-shift {
+  width: 140px;
+  display: block;
+}
+
+#center-shift .button {
+  width: 100%;
+}
+
+.center-browser {
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.center-browser .knob-container {
+  width: var(--knob-size-xl);
+  height: var(--knob-size-xl);
+}
+
+.center-browser .button {
+  width: 50px;
+  height: var(--button-height-xs);
+  min-height: unset;
+  aspect-ratio: auto;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-md);
+}
+
+.center-section .button {
+  width: 100%;
+  height: var(--button-height-sm);
+  min-height: unset;
+  aspect-ratio: auto;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+}
+
+.center-section .control {
+  gap: var(--spacing-xs);
+}
+
+.center-section .control-label {
+  font-size: var(--font-size-md);
+}
+
+/* ====== FX Knobs Section ====== */
+.fx-knobs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-xl);
+  padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-sm) var(--spacing-lg);
+  background: var(--bg-dark);
+  border-radius: var(--spacing-sm) var(--spacing-sm) 0 0;
+}
+
+/* FX knobs - labels below knobs */
+.fx-knobs .control-label {
+  order: 1;
+  text-align: right;
+  width: 100%;
+}
+
+.fx-knobs .knob-container {
+  width: var(--knob-size-lg);
+  height: var(--knob-size-lg);
+  position: relative;
+}
+
+/* ====== Deck Buttons Section ====== */
+.deck-buttons {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: var(--spacing-md);
+  padding: 0 var(--spacing-lg) var(--spacing-lg) var(--spacing-lg);
+  background: var(--bg-dark);
+  border-radius: 0 0 var(--spacing-sm) var(--spacing-sm);
+  align-items: center;
+}
+
+.deck-buttons .button {
+  aspect-ratio: auto;
+  height: var(--button-height-xl);
+  min-height: unset;
+}
+
+.deck-buttons .button::after {
+  display: none;
+}
+
+.deck-buttons .control {
+  gap: var(--spacing-sm);
+}
+
+.deck-buttons .knob-container {
+  width: var(--knob-size-sm);
+  height: var(--knob-size-sm);
+}
+
+/* ====== Performance Pads Section ====== */
+.performance-pads {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl);
+  margin-top: var(--spacing-xl);
+  background: var(--bg-dark);
+  border-radius: var(--spacing-sm);
+}
+
+.performance-pads .button {
+  min-height: 80px;
+  border-radius: var(--radius-xl);
+}
+
+.performance-pads .control-label {
+  display: none;
+}
+
+/* ====== Responsive Layout ====== */
+@media (max-width: 1200px) {
+  .controller {
+    grid-template-columns: 1fr;
+  }
+}

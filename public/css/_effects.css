@@ -1,0 +1,27 @@
+/* ============================================
+   Effects & Animations
+   ============================================ */
+
+/* ====== Click Ring Effect for Knobs ====== */
+.knob-container.clicked::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: var(--radius-full);
+  border: var(--border-width-lg) solid #ff0000;
+  box-shadow: 0 0 12px rgba(255, 0, 0, 0.6);
+  pointer-events: none;
+  animation: pulse-ring var(--transition-slow);
+  z-index: var(--z-ring);
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
