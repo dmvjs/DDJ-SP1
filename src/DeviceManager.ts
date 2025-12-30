@@ -121,14 +121,33 @@ export class DeviceManager extends EventEmitter {
         console.log('⬆️  SHIFT:', this.stateManager.isShiftPressed() ? 'PRESSED' : 'RELEASED');
       }
 
+      // TEMP: Log performance pad presses with shift state for mapping
+      if ((msg.channel === 7 || msg.channel === 8) && msg.velocity > 0) {
+        console.log('🎯 PAD:', `note=${msg.note}`, `channel=${msg.channel}`, `SHIFT=${this.stateManager.isShiftPressed()}`);
+      }
+
       // Check if this is a shifted FX button
       const isShiftedFX = this.stateManager.isShiftedFXNote(msg.note, msg.channel);
 
+      // Check if this is a shifted performance pad
+      const isShiftedPad = this.stateManager.isShiftedPad(msg.note, msg.channel);
+
       // Map shifted note to original note
-      const originalNote = isShiftedFX ? this.stateManager.getOriginalNote(msg.note) : msg.note;
+      let originalNote = msg.note;
+      let originalChannel = msg.channel;
+
+      if (isShiftedFX) {
+        originalNote = this.stateManager.getOriginalNote(msg.note);
+      } else if (isShiftedPad) {
+        const padMapping = this.stateManager.getOriginalPad(msg.note, msg.channel);
+        if (padMapping) {
+          originalNote = padMapping.note;
+          originalChannel = padMapping.channel;
+        }
+      }
 
       // Check if this is an FX button
-      const isFXButton = this.stateManager.isFXButton(msg.channel, originalNote);
+      const isFXButton = this.stateManager.isFXButton(originalChannel, originalNote);
 
       // Handle shifted FX button press (toggle lock)
       if (isShiftedFX) {
@@ -143,20 +162,27 @@ export class DeviceManager extends EventEmitter {
           // Emit lock state change event
           this.emit('lock', lockChange);
         }
+      } else if (isShiftedPad) {
+        // For shifted pads, echo LED to the original pad channel/note
+        this.setLED(originalChannel, originalNote, msg.velocity);
       } else if (isFXButton) {
         // For FX buttons, use state manager to get proper LED velocity
         const ledVelocity = this.stateManager.getLEDVelocity(msg.channel, msg.note, msg.velocity);
         this.setLED(msg.channel, msg.note, ledVelocity);
+      } else if (this.stateManager.isPerformancePad(msg.channel)) {
+        // Performance pads: echo LED on same channel/note
+        this.setLED(msg.channel, msg.note, msg.velocity);
       } else {
         // For other buttons, just echo normally
         this.setLED(msg.channel, msg.note, msg.velocity);
       }
 
+      // Emit event with original channel/note for shifted pads
       const event: ControllerEvent = {
         type: 'button',
-        button: msg.note,
+        button: originalNote,
         pressed: msg.velocity > 0,
-        channel: msg.channel
+        channel: originalChannel
       };
       this.emit('event', event);
       this.emit('button', event);

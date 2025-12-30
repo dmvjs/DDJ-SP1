@@ -8,4 +8,4 @@ yarn-error.log*
 /.pnp
 .pnp.js
 
-.vscode/*
+.vscode/*.DS_Store
