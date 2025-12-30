@@ -17,6 +17,7 @@ export interface LockStateChange {
 export class ControlStateManager {
   private shiftPressed: boolean = false;
   private lockedButtons: Map<string, boolean> = new Map();
+  private fxAssignments: Map<string, boolean> = new Map(); // key: "fx:deck" (e.g., "1:1" = FX1→Deck1)
 
   // Map shifted note numbers to their unshifted equivalents
   private readonly shiftedNoteMap: Map<number, number> = new Map([
@@ -101,6 +102,47 @@ export class ControlStateManager {
    */
   isPerformancePad(channel: number): boolean {
     return channel === 7 || channel === 8;
+  }
+
+  /**
+   * Check if a button is an FX ASSIGN button (channel 6, notes 76/77/80/81)
+   */
+  isFXAssignButton(channel: number, note: number): boolean {
+    return channel === 6 && (note === 76 || note === 77 || note === 80 || note === 81);
+  }
+
+  /**
+   * Get FX unit and deck from FX ASSIGN button note
+   * @returns {fx, deck} or null if not an FX ASSIGN button
+   */
+  getFXAssignMapping(note: number): { fx: number; deck: number } | null {
+    const mapping: Record<number, { fx: number; deck: number }> = {
+      76: { fx: 1, deck: 1 }, // FX1 → Deck 1
+      80: { fx: 2, deck: 1 }, // FX2 → Deck 1
+      77: { fx: 1, deck: 2 }, // FX1 → Deck 2
+      81: { fx: 2, deck: 2 }, // FX2 → Deck 2
+    };
+    return mapping[note] || null;
+  }
+
+  /**
+   * Toggle FX assignment to a deck
+   * @returns new assignment state
+   */
+  toggleFXAssignment(fx: number, deck: number): boolean {
+    const key = `${fx}:${deck}`;
+    const wasAssigned = this.fxAssignments.get(key) || false;
+    const nowAssigned = !wasAssigned;
+    this.fxAssignments.set(key, nowAssigned);
+    return nowAssigned;
+  }
+
+  /**
+   * Check if an FX is assigned to a deck
+   */
+  isFXAssigned(fx: number, deck: number): boolean {
+    const key = `${fx}:${deck}`;
+    return this.fxAssignments.get(key) || false;
   }
 
   /**

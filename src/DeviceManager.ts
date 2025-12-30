@@ -113,7 +113,10 @@ export class DeviceManager extends EventEmitter {
 
     // Handle button presses (Note On/Off)
     this.input.on('noteon', (msg: any) => {
-      console.log('🔵 BUTTON:', `note=${msg.note}`, `channel=${msg.channel}`, `velocity=${msg.velocity}`);
+      // TEMP: Log all channel 6 button presses to find FX ASSIGN buttons
+      if (msg.channel === 6 && msg.velocity > 0) {
+        console.log('🔵 CH6 BUTTON:', `note=${msg.note}`, `velocity=${msg.velocity}`);
+      }
 
       // Check if this is the SHIFT button (button-64-ch6)
       if (msg.channel === 6 && msg.note === 64) {
@@ -121,10 +124,8 @@ export class DeviceManager extends EventEmitter {
         console.log('⬆️  SHIFT:', this.stateManager.isShiftPressed() ? 'PRESSED' : 'RELEASED');
       }
 
-      // TEMP: Log performance pad presses with shift state for mapping
-      if ((msg.channel === 7 || msg.channel === 8) && msg.velocity > 0) {
-        console.log('🎯 PAD:', `note=${msg.note}`, `channel=${msg.channel}`, `SHIFT=${this.stateManager.isShiftPressed()}`);
-      }
+      // Check if this is an FX ASSIGN button
+      const isFXAssignButton = this.stateManager.isFXAssignButton(msg.channel, msg.note);
 
       // Check if this is a shifted FX button
       const isShiftedFX = this.stateManager.isShiftedFXNote(msg.note, msg.channel);
@@ -149,8 +150,20 @@ export class DeviceManager extends EventEmitter {
       // Check if this is an FX button
       const isFXButton = this.stateManager.isFXButton(originalChannel, originalNote);
 
+      // Handle FX ASSIGN button press (toggle assignment)
+      if (isFXAssignButton && msg.velocity > 0) {
+        const mapping = this.stateManager.getFXAssignMapping(msg.note);
+        if (mapping) {
+          const nowAssigned = this.stateManager.toggleFXAssignment(mapping.fx, mapping.deck);
+
+          // Try LEDs on channel 4 with same note numbers
+          this.setLED(4, msg.note, nowAssigned ? 127 : 0);
+
+          console.log('🎛️  FX ASSIGN:', `FX${mapping.fx}→Deck${mapping.deck}`, nowAssigned ? 'ON' : 'OFF', `LED: ch4 note${msg.note}`);
+        }
+      }
       // Handle shifted FX button press (toggle lock)
-      if (isShiftedFX) {
+      else if (isShiftedFX) {
         const lockChange = this.stateManager.handleShiftedFXPress(msg.channel, msg.note, msg.velocity);
 
         if (lockChange) {
