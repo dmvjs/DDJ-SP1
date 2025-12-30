@@ -213,15 +213,25 @@ export class UIRenderer {
 
   /**
    * Update knob visual state
+   * @param {HTMLElement} element - The knob element
+   * @param {string} id - The knob ID
+   * @param {number} value - The MIDI value
+   * @param {Object} state - The controller state (optional, for BEATS knobs)
    */
-  updateKnob(element, id, value) {
+  updateKnob(element, id, value, state = null) {
     const valueElement = element.querySelector('.knob-value');
     const progress = element.querySelector('.knob-progress');
     const knob = element.querySelector('.knob');
 
     if (!valueElement || !progress || !knob) return;
 
-    valueElement.textContent = value;
+    // BEATS knobs show tempo (84, 94, or 102) instead of MIDI value
+    const isBeatsKnob = id === 'knob-0-ch4' || id === 'knob-0-ch5';
+    if (isBeatsKnob && state) {
+      valueElement.textContent = state.getTempo();
+    } else {
+      valueElement.textContent = value;
+    }
 
     // FX knobs use 7:00 to 5:00 range (-150° to +150°, 300° total)
     // Limited-range knobs use 9x multiplier for more visible movement
@@ -264,6 +274,20 @@ export class UIRenderer {
       knobContainer.classList.add('clicked');
     } else {
       knobContainer.classList.remove('clicked');
+    }
+  }
+
+  /**
+   * Update mode button to show active state
+   */
+  updateModeButton(element, isActive) {
+    const button = element.querySelector('.button');
+    if (!button) return;
+
+    if (isActive) {
+      button.classList.add('mode-active');
+    } else {
+      button.classList.remove('mode-active');
     }
   }
 

@@ -1,0 +1,86 @@
+/* ============================================
+   Active Tracks Display - Dense Single Line
+   ============================================ */
+
+.active-tracks-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: #0a0a0a;
+  margin-bottom: 1rem;
+  border-top: 1px solid #333;
+  border-bottom: 1px solid #333;
+}
+
+.active-track {
+  background: #1a1a1a;
+  padding: 0.4rem 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 11px;
+  line-height: 1.2;
+  overflow: hidden;
+}
+
+.track-header {
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.track-key {
+  font-weight: 700;
+  font-size: 9px;
+  padding: 0.15rem 0.3rem;
+  border-radius: 3px;
+  flex-shrink: 0;
+  text-align: center;
+  min-width: 22px;
+}
+
+.track-content {
+  color: #e0e0e0;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.track-empty {
+  color: #444;
+  font-size: 11px;
+}
+
+/* Deck-specific colors */
+.deck-1 .track-header {
+  color: #ff6b6b;
+}
+
+.deck-2 .track-header {
+  color: #4dabf7;
+}
+
+.deck-3 .track-header {
+  color: #51cf66;
+}
+
+.deck-4 .track-header {
+  color: #ffd43b;
+}
+
+/* Key color badges - Camelot wheel inspired */
+.track-key.key-1 { background: #ff6b6b; color: #000; } /* 1A/8B - Red */
+.track-key.key-2 { background: #ffa94d; color: #000; } /* 2A/9B - Orange */
+.track-key.key-3 { background: #ffd43b; color: #000; } /* 3A/10B - Yellow */
+.track-key.key-4 { background: #a9e34b; color: #000; } /* 4A/11B - Yellow-Green */
+.track-key.key-5 { background: #51cf66; color: #000; } /* 5A/12B - Green */
+.track-key.key-6 { background: #22b8cf; color: #000; } /* 6A/1B - Cyan */
+.track-key.key-7 { background: #4dabf7; color: #000; } /* 7A/2B - Blue */
+.track-key.key-8 { background: #748ffc; color: #000; } /* 8A/3B - Indigo */
+.track-key.key-9 { background: #9775fa; color: #000; } /* 9A/4B - Purple */
+.track-key.key-10 { background: #da77f2; color: #000; } /* 10A/5B - Magenta */
+.track-key.key-11 { background: #f783ac; color: #000; } /* 11A/6B - Pink */
+.track-key.key-12 { background: #ff8787; color: #000; } /* 12A/7B - Light Red */

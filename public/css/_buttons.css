@@ -31,6 +31,13 @@
   transform: scale(0.95);
 }
 
+/* Mode button active state (for HOT CUE, ROLL, SLICER, SAMPLER) */
+.button.mode-active {
+  background: linear-gradient(135deg, #4a90ff 0%, #2a70df 100%);
+  border-color: #6aa0ff;
+  box-shadow: 0 0 20px rgba(74, 144, 255, 0.6), 0 0 40px rgba(74, 144, 255, 0.3);
+}
+
 /* Remove circular gradient from specific buttons */
 #button-101-ch6 .button::after,
 #button-103-ch6 .button::after,

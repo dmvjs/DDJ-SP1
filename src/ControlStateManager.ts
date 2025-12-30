@@ -20,6 +20,29 @@ export class ControlStateManager {
   private fxAssignments: Map<string, boolean> = new Map(); // key: "fx:deck" (e.g., "1:1" = FX1→Deck1)
   private deckButtonStates: Map<string, boolean> = new Map(); // key: "channel:note" for DECK buttons
 
+  // Performance pad mode management
+  // Tracks mode for each of the 4 decks (1-4)
+  private padModes: Map<number, number> = new Map([
+    [1, 27], // Deck 1 starts with HOT CUE (note 27)
+    [2, 27], // Deck 2 starts with HOT CUE (note 27)
+    [3, 27], // Deck 3 starts with HOT CUE (note 27)
+    [4, 27], // Deck 4 starts with HOT CUE (note 27)
+  ]);
+  private readonly modeButtons = [27, 30, 32, 34]; // HOT CUE, ROLL, SLICER, SAMPLER
+
+  // Tempo management
+  private currentTempo: 84 | 94 | 102 = 94;
+  private readonly tempos: Array<84 | 94 | 102> = [84, 94, 102];
+  private lastTempoChangeTime: number = 0;
+
+  // Sync state: tracks which decks are synced
+  private syncStates: Map<number, boolean> = new Map([
+    [1, false],
+    [2, false],
+    [3, false],
+    [4, false],
+  ]);
+
   // Map shifted note numbers to their unshifted equivalents
   private readonly shiftedNoteMap: Map<number, number> = new Map([
     [99, 71],   // FX1
@@ -198,6 +221,17 @@ export class ControlStateManager {
   }
 
   /**
+   * Get current DECK button states for syncing to client
+   * @returns {deck1_3: boolean, deck2_4: boolean}
+   */
+  getDeckButtonStates(): { deck1_3: boolean; deck2_4: boolean } {
+    return {
+      deck1_3: this.isDeckButtonOn(2, 114),
+      deck2_4: this.isDeckButtonOn(3, 114)
+    };
+  }
+
+  /**
    * Toggle lock state for a button
    * @returns new lock state
    */
@@ -280,9 +314,193 @@ export class ControlStateManager {
   }
 
   /**
+   * Check if a control is a BEATS knob (channels 4 or 5, note 0)
+   */
+  isBeatsKnob(channel: number, note: number): boolean {
+    return (channel === 4 || channel === 5) && note === 0;
+  }
+
+  /**
+   * Handle BEATS knob change to switch between tempos
+   * Both BEATS knobs (left and right) stay synced
+   * @returns new tempo if changed, null if no change
+   */
+  handleBeatsKnobChange(channel: number, value: number): 84 | 94 | 102 | null {
+    console.log(`🔍 BEATS KNOB: ch${channel} value=${value}`);
+
+    // Infinite encoders send low values (1-63) for clockwise, high values (65-127) for counter-clockwise
+    if (value === 64) {
+      return null;
+    }
+
+    const isClockwise = value < 64;
+
+    const currentIndex = this.tempos.indexOf(this.currentTempo);
+    console.log(`   Current tempo: ${this.currentTempo} (index ${currentIndex}), turning ${isClockwise ? 'RIGHT' : 'LEFT'}`);
+
+    let newIndex: number;
+
+    if (isClockwise) {
+      // Turn right: go up (84 → 94 → 102, stops at 102)
+      newIndex = Math.min(currentIndex + 1, this.tempos.length - 1);
+    } else {
+      // Turn left: go down (102 → 94 → 84, stops at 84)
+      newIndex = Math.max(currentIndex - 1, 0);
+    }
+
+    // Only update if tempo actually changed
+    if (newIndex === currentIndex) {
+      console.log(`   Already at ${isClockwise ? 'max' : 'min'} tempo, no change`);
+      return null;
+    }
+
+    this.currentTempo = this.tempos[newIndex];
+    console.log(`   ✅ New tempo: ${this.currentTempo}`);
+    return this.currentTempo;
+  }
+
+  /**
+   * Get current tempo
+   */
+  getCurrentTempo(): 84 | 94 | 102 {
+    return this.currentTempo;
+  }
+
+  /**
+   * Set tempo directly (for external control or initialization)
+   */
+  setTempo(tempo: 84 | 94 | 102): void {
+    if (!this.tempos.includes(tempo)) {
+      throw new Error(`Invalid tempo: ${tempo}. Must be 84, 94, or 102`);
+    }
+    this.currentTempo = tempo;
+  }
+
+  /**
+   * Check if a button is a performance pad mode button
+   */
+  isModeButton(channel: number, note: number): boolean {
+    return (channel === 0 || channel === 1) && this.modeButtons.includes(note);
+  }
+
+  /**
+   * Handle mode button press (radio button behavior)
+   * Updates mode for the currently active deck (1-4) based on channel and DECK button state
+   * @returns {activeMode: number, channel: number, deck: number} if mode changed, null otherwise
+   */
+  handleModeButtonPress(channel: number, note: number, velocity: number): { activeMode: number; channel: number; deck: number } | null {
+    // Only process on button press (velocity > 0)
+    if (velocity === 0 || !this.isModeButton(channel, note)) {
+      return null;
+    }
+
+    // Determine which deck (1-4) this mode button applies to
+    // Channel 0 (left) → Deck 1 or 3 (based on DECK 1/3 button)
+    // Channel 1 (right) → Deck 2 or 4 (based on DECK 2/4 button)
+    let targetDeck: number;
+    if (channel === 0) {
+      const deck3Active = this.isDeckButtonOn(2, 114);
+      targetDeck = deck3Active ? 3 : 1;
+    } else {
+      const deck4Active = this.isDeckButtonOn(3, 114);
+      targetDeck = deck4Active ? 4 : 2;
+    }
+
+    // Set this as the active mode for the target deck
+    this.padModes.set(targetDeck, note);
+    console.log(`🎮 Deck ${targetDeck} mode: ${this.getModeName(note)}`);
+
+    return {
+      activeMode: note,
+      channel: channel,
+      deck: targetDeck
+    };
+  }
+
+  /**
+   * Get the active mode for a deck (1-4)
+   */
+  getActiveMode(deck: number): number {
+    return this.padModes.get(deck) || 27; // Default to HOT CUE
+  }
+
+  /**
+   * Get the active mode for a channel based on DECK button state
+   * Channel 0 (left) → Deck 1 or 3
+   * Channel 1 (right) → Deck 2 or 4
+   */
+  getActiveModeForChannel(channel: number): number {
+    let targetDeck: number;
+    if (channel === 0) {
+      const deck3Active = this.isDeckButtonOn(2, 114);
+      targetDeck = deck3Active ? 3 : 1;
+    } else {
+      const deck4Active = this.isDeckButtonOn(3, 114);
+      targetDeck = deck4Active ? 4 : 2;
+    }
+    return this.getActiveMode(targetDeck);
+  }
+
+  /**
+   * Get all mode button notes
+   */
+  getModeButtons(): number[] {
+    return [...this.modeButtons];
+  }
+
+  /**
+   * Get initial pad mode states for syncing to client (all 4 decks)
+   */
+  getPadModeStates(): { deck1: number; deck2: number; deck3: number; deck4: number } {
+    return {
+      deck1: this.getActiveMode(1),
+      deck2: this.getActiveMode(2),
+      deck3: this.getActiveMode(3),
+      deck4: this.getActiveMode(4)
+    };
+  }
+
+  /**
+   * Get mode name for logging
+   */
+  private getModeName(note: number): string {
+    const names: Record<number, string> = {
+      27: 'HOT CUE',
+      30: 'ROLL',
+      32: 'SLICER',
+      34: 'SAMPLER'
+    };
+    return names[note] || 'UNKNOWN';
+  }
+
+  /**
    * Generate a unique key for a button
    */
   private getButtonKey(channel: number, note: number): string {
     return `${channel}:${note}`;
+  }
+
+  /**
+   * Check if a button is a SYNC button
+   */
+  isSyncButton(channel: number, note: number): boolean {
+    return (channel === 0 || channel === 1) && note === 88;
+  }
+
+  /**
+   * Toggle sync state for a deck
+   */
+  toggleSync(deck: number): boolean {
+    const currentState = this.syncStates.get(deck) || false;
+    this.syncStates.set(deck, !currentState);
+    console.log(`🔄 Deck ${deck} SYNC: ${!currentState ? 'ON' : 'OFF'}`);
+    return !currentState;
+  }
+
+  /**
+   * Check if a deck is synced
+   */
+  isSynced(deck: number): boolean {
+    return this.syncStates.get(deck) || false;
   }
 }

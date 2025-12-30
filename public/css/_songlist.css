@@ -1,0 +1,124 @@
+/* ============================================
+   Song List - Dark Mode, Dense
+   ============================================ */
+
+.song-list-container {
+  width: 100%;
+  margin: 0 0 2rem 0;
+  padding: 0;
+  background: #1a1a1a;
+  border-radius: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.song-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 1rem;
+  background: #0a0a0a;
+  color: #ffffff;
+  font-weight: 600;
+  border-bottom: 1px solid #333;
+  font-size: 13px;
+}
+
+.song-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: #1a1a1a;
+}
+
+.song-item {
+  display: grid;
+  grid-template-columns: 50px 180px 1fr 50px 60px;
+  gap: 1rem;
+  padding: 0.35rem 1rem;
+  border-bottom: 1px solid #2a2a2a;
+  font-size: 13px;
+  line-height: 1.2;
+  transition: background-color 0.1s ease;
+}
+
+.song-item:hover {
+  background-color: #252525;
+  cursor: pointer;
+}
+
+/* Selected item */
+.song-item.selected {
+  background-color: #2a4a6a !important;
+  border-left: 3px solid #4a90ff;
+}
+
+/* Zebra striping */
+.song-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.song-item:nth-child(even):hover {
+  background-color: #252525;
+}
+
+.song-id {
+  color: #666;
+  font-weight: 500;
+}
+
+.song-artist {
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+.song-title {
+  color: #aaa;
+}
+
+.song-key {
+  text-align: center;
+  color: #888;
+  font-variant-numeric: tabular-nums;
+}
+
+.song-bpm {
+  text-align: right;
+  color: #888;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.tempo-display {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.song-count {
+  color: #666;
+  font-size: 11px;
+}
+
+/* Minimal scrollbar */
+.song-list-wrapper {
+  max-height: 300px;
+  overflow-y: auto;
+  background: #1a1a1a;
+}
+
+.song-list-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.song-list-wrapper::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+.song-list-wrapper::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+.song-list-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}

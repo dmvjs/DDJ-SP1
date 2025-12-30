@@ -10,6 +10,8 @@ const app = express();
 const PORT = 3000;
 // Serve static files from public directory
 app.use(express.static(join(__dirname, '../public')));
+// Serve music files from juh project
+app.use('/music', express.static(join(__dirname, '../../juh/music')));
 const server = app.listen(PORT, () => {
     console.log(`Web UI running at http://localhost:${PORT}`);
 });
@@ -43,10 +45,66 @@ manager.on('lock', (lockEvent) => {
         }
     });
 });
+// Broadcast tempo changes to all connected clients
+manager.on('tempoChange', (tempoEvent) => {
+    const message = JSON.stringify({ type: 'tempoChange', data: tempoEvent });
+    wss.clients.forEach((client) => {
+        if (client.readyState === 1) {
+            client.send(message);
+        }
+    });
+});
+// Broadcast pad mode changes to all connected clients
+manager.on('modeChange', (modeEvent) => {
+    const message = JSON.stringify({ type: 'modeChange', data: modeEvent });
+    wss.clients.forEach((client) => {
+        if (client.readyState === 1) {
+            client.send(message);
+        }
+    });
+});
+// Broadcast pad press events to all connected clients
+manager.on('padPress', (padEvent) => {
+    const message = JSON.stringify({ type: 'padPress', data: padEvent });
+    wss.clients.forEach((client) => {
+        if (client.readyState === 1) {
+            client.send(message);
+        }
+    });
+});
+// Broadcast sync state changes to all connected clients
+manager.on('syncChange', (syncEvent) => {
+    const message = JSON.stringify({ type: 'syncChange', data: syncEvent });
+    wss.clients.forEach((client) => {
+        if (client.readyState === 1) {
+            client.send(message);
+        }
+    });
+});
+// Broadcast spindown events to all connected clients
+manager.on('spindown', (spindownEvent) => {
+    const message = JSON.stringify({ type: 'spindown', data: spindownEvent });
+    wss.clients.forEach((client) => {
+        if (client.readyState === 1) {
+            client.send(message);
+        }
+    });
+});
 wss.on('connection', (ws) => {
     console.log('Client connected');
     // Send initial layout to new client
     ws.send(JSON.stringify({ type: 'layout', data: DDJ_SP1_LAYOUT }));
+    // Send current tempo to new client
+    const currentTempo = manager.getStateManager().getCurrentTempo();
+    ws.send(JSON.stringify({ type: 'tempoChange', data: { tempo: currentTempo } }));
+    // Send current DECK button states to new client
+    const deckStates = manager.getStateManager().getDeckButtonStates();
+    ws.send(JSON.stringify({ type: 'deckButtonStates', data: deckStates }));
+    // Send current pad mode states to new client
+    const padModes = manager.getStateManager().getPadModeStates();
+    ws.send(JSON.stringify({ type: 'padModeStates', data: padModes }));
+    // Sync device LEDs to match current state
+    manager.syncModeLEDs();
     ws.on('close', () => {
         console.log('Client disconnected');
     });
