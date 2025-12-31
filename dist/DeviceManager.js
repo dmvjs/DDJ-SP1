@@ -207,6 +207,27 @@ export class DeviceManager extends EventEmitter {
             return;
         // Handle button presses (Note On/Off)
         this.input.on('noteon', (msg) => {
+            // Check if this is a pad release (velocity 0)
+            if (this.stateManager.isPerformancePad(msg.channel) && msg.velocity === 0) {
+                console.log('🎹 PAD RELEASE (noteon vel=0):', `ch${msg.channel}`, `note${msg.note}`);
+                // Determine which deck based on DECK button state
+                let activeDeck;
+                if (msg.channel === 7) {
+                    const deck3Active = this.stateManager.isDeckButtonOn(2, 114);
+                    activeDeck = deck3Active ? 3 : 1;
+                }
+                else {
+                    const deck4Active = this.stateManager.isDeckButtonOn(3, 114);
+                    activeDeck = deck4Active ? 4 : 2;
+                }
+                // Emit pad release event
+                this.emit('padRelease', {
+                    channel: msg.channel,
+                    note: msg.note,
+                    deck: activeDeck
+                });
+                return;
+            }
             // DEBUG: Log ALL pad messages to debug deck 3/4 pad LED issue
             if ((msg.channel === 7 || msg.channel === 8) && msg.velocity > 0) {
                 console.log('🎹 PAD PRESS:', `ch${msg.channel}`, `note${msg.note}`, `vel${msg.velocity}`);
@@ -264,9 +285,12 @@ export class DeviceManager extends EventEmitter {
                     activeDeck = deck4Active ? 4 : 2;
                 }
                 const activeMode = this.stateManager.getActiveMode(activeDeck);
+                console.log(`🎹 PAD ${msg.note} on deck ${activeDeck}: activeMode=${activeMode}`);
                 // Only handle pads that are active in current mode
-                if (activeMode === 27) { // HOT CUE mode
-                    const activePads = [0, 1, 2, 3, 4, 5, 6, 7]; // All 8 pads
+                if (activeMode === 27 || activeMode === 30) { // HOT CUE mode (27) or ROLL mode (30)
+                    console.log(`✅ Mode ${activeMode} matched - emitting padPress`);
+                    // All performance pads use notes 0-7 regardless of mode
+                    const activePads = [0, 1, 2, 3, 4, 5, 6, 7];
                     if (activePads.includes(msg.note)) {
                         // Flash off
                         this.setLED(msg.channel, msg.note, 0);
@@ -278,7 +302,7 @@ export class DeviceManager extends EventEmitter {
                         const isSynced = this.stateManager.isSynced(activeDeck);
                         this.emit('padPress', {
                             channel: msg.channel,
-                            note: msg.note,
+                            note: msg.note, // 0-7
                             deck: activeDeck,
                             synced: isSynced
                         });
@@ -477,12 +501,33 @@ export class DeviceManager extends EventEmitter {
             this.emit('event', event);
             this.emit('button', event);
         });
+        // Handle button releases (Note Off) - for roll mode
+        this.input.on('noteoff', (msg) => {
+            console.log('🎹 PAD RELEASE (noteoff):', `ch${msg.channel}`, `note${msg.note}`, `vel${msg.velocity}`);
+            // Only handle performance pad releases (channels 7 & 8)
+            if (this.stateManager.isPerformancePad(msg.channel)) {
+                // Determine which deck based on DECK button state
+                let activeDeck;
+                if (msg.channel === 7) {
+                    const deck3Active = this.stateManager.isDeckButtonOn(2, 114);
+                    activeDeck = deck3Active ? 3 : 1;
+                }
+                else {
+                    const deck4Active = this.stateManager.isDeckButtonOn(3, 114);
+                    activeDeck = deck4Active ? 4 : 2;
+                }
+                // Emit pad release event
+                this.emit('padRelease', {
+                    channel: msg.channel,
+                    note: msg.note, // 0-7
+                    deck: activeDeck
+                });
+            }
+        });
         // Handle knobs and dials (Control Change)
         this.input.on('cc', (msg) => {
-            console.log('🔄 KNOB:', `controller=${msg.controller}`, `channel=${msg.channel}`, `value=${msg.value}`);
             // Check if this is a BEATS knob (tempo selector)
             const isBeats = this.stateManager.isBeatsKnob(msg.channel, msg.controller);
-            console.log(`   isBeatsKnob(${msg.channel}, ${msg.controller}) = ${isBeats}`);
             if (isBeats) {
                 console.log('   🎵 BEATS KNOB DETECTED - calling handleBeatsKnobChange');
                 const newTempo = this.stateManager.handleBeatsKnobChange(msg.channel, msg.value);

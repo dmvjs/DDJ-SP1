@@ -77,7 +77,19 @@ manager.on('modeChange', (modeEvent) => {
 
 // Broadcast pad press events to all connected clients
 manager.on('padPress', (padEvent) => {
+  console.log(`📤 Broadcasting padPress:`, padEvent);
   const message = JSON.stringify({ type: 'padPress', data: padEvent });
+  wss.clients.forEach((client) => {
+    if (client.readyState === 1) {
+      client.send(message);
+    }
+  });
+});
+
+// Broadcast pad release events to all connected clients
+manager.on('padRelease', (padEvent) => {
+  console.log(`📤 Broadcasting padRelease:`, padEvent);
+  const message = JSON.stringify({ type: 'padRelease', data: padEvent });
   wss.clients.forEach((client) => {
     if (client.readyState === 1) {
       client.send(message);

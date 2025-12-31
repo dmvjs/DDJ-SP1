@@ -44,8 +44,12 @@ ws.on('message', async (message) => {
     handleModeChange(message.data);
   } else if (message.type === 'padPress') {
     handlePadPress(message.data);
+  } else if (message.type === 'padRelease') {
+    handlePadRelease(message.data);
   } else if (message.type === 'spindown') {
     handleSpindown(message.data);
+  } else if (message.type === 'syncChange') {
+    handleSyncChange(message.data);
   }
 });
 
@@ -137,6 +141,20 @@ function handleButtonEvent(control, event) {
   if (event.pressed && (control.id === 'button-64-ch0' || control.id === 'button-64-ch1')) {
     handleSlipButton(control.id);
   }
+
+  // Handle CENSOR buttons - reverse playback
+  if (control.id === 'button-21-ch0' || control.id === 'button-21-ch1') {
+    if (event.pressed) {
+      handleCensorPress(control.id);
+    } else {
+      handleCensorRelease(control.id);
+    }
+  }
+
+  // Handle SYNC buttons - sync deck playback positions (only on button press)
+  if (event.pressed && (control.id === 'button-88-ch0' || control.id === 'button-88-ch1')) {
+    handleSyncButton(control.id);
+  }
 }
 
 /**
@@ -198,6 +216,136 @@ function handleSlipButton(buttonId) {
     const audioDeck = targetDeck - 1; // Convert deck 1-4 to audio deck 0-3
     audioPlayer.fadeOut(audioDeck, 0.2); // 200ms fadeout
     console.log(`💫 SLIP pressed: Fading out Deck ${targetDeck}`);
+  }
+}
+
+/**
+ * Handle CENSOR button press - start reverse playback
+ */
+function handleCensorPress(buttonId) {
+  let targetDeck;
+
+  if (buttonId === 'button-21-ch0') {
+    // CENSOR A (left): deck 1 or 3 based on DECK 1/3 button
+    const deck3Active = state.isDeckButtonActive(2);
+    targetDeck = deck3Active ? 3 : 1;
+  } else if (buttonId === 'button-21-ch1') {
+    // CENSOR B (right): deck 2 or 4 based on DECK 2/4 button
+    const deck4Active = state.isDeckButtonActive(3);
+    targetDeck = deck4Active ? 4 : 2;
+  }
+
+  if (targetDeck) {
+    const audioDeck = targetDeck - 1; // Convert deck 1-4 to audio deck 0-3
+    audioPlayer.startReverse(audioDeck);
+    console.log(`⏪ CENSOR pressed: Starting reverse on Deck ${targetDeck}`);
+  }
+}
+
+/**
+ * Handle CENSOR button release - stop reverse and resume normal playback
+ */
+function handleCensorRelease(buttonId) {
+  let targetDeck;
+
+  if (buttonId === 'button-21-ch0') {
+    // CENSOR A (left): deck 1 or 3 based on DECK 1/3 button
+    const deck3Active = state.isDeckButtonActive(2);
+    targetDeck = deck3Active ? 3 : 1;
+  } else if (buttonId === 'button-21-ch1') {
+    // CENSOR B (right): deck 2 or 4 based on DECK 2/4 button
+    const deck4Active = state.isDeckButtonActive(3);
+    targetDeck = deck4Active ? 4 : 2;
+  }
+
+  if (targetDeck) {
+    const audioDeck = targetDeck - 1; // Convert deck 1-4 to audio deck 0-3
+    audioPlayer.stopReverse(audioDeck);
+    console.log(`⏪ CENSOR released: Resuming normal playback on Deck ${targetDeck}`);
+  }
+}
+
+/**
+ * Handle SYNC button press - sync one deck's playback to the other
+ */
+function handleSyncButton(buttonId) {
+  console.log(`🔗 SYNC button pressed: ${buttonId}`);
+
+  if (buttonId === 'button-88-ch0') {
+    // SYNC A (left): sync right deck to left deck's position
+    const deck3Active = state.isDeckButtonActive(2);
+    const deck4Active = state.isDeckButtonActive(3);
+    const leftDeck = deck3Active ? 3 : 1;
+    const rightDeck = deck4Active ? 4 : 2;
+
+    console.log(`🔗 SYNC LEFT: leftDeck=${leftDeck}, rightDeck=${rightDeck}`);
+
+    // Get the loaded song for the right deck
+    const rightSong = activeTracks.getTrack(rightDeck);
+    if (!rightSong) {
+      console.log(`⚠️  No song loaded on Deck ${rightDeck}`);
+      return;
+    }
+
+    const leftAudioDeck = leftDeck - 1;
+    const rightAudioDeck = rightDeck - 1;
+
+    // Get current state of left deck
+    const leftState = audioPlayer.getCurrentPlaybackState(leftAudioDeck);
+    if (!leftState) {
+      console.log(`⚠️  Deck ${leftDeck} is not playing`);
+      return;
+    }
+
+    // Check tempo match
+    if (leftState.song.bpm !== rightSong.bpm) {
+      console.log(`⚠️  Tempo mismatch: Deck ${leftDeck} (${leftState.song.bpm} BPM) vs Deck ${rightDeck} (${rightSong.bpm} BPM)`);
+      return;
+    }
+
+    // Sync right deck to left deck's position
+    const beatsPerSecond = rightSong.bpm / 60;
+    const positionInBeats = leftState.position * beatsPerSecond;
+    console.log(`🔗 Syncing Deck ${rightDeck} to Deck ${leftDeck}: ${leftState.section} at ${positionInBeats.toFixed(2)} beats`);
+    audioPlayer.play(rightSong, rightAudioDeck, leftState.section, positionInBeats);
+
+  } else if (buttonId === 'button-88-ch1') {
+    // SYNC B (right): sync left deck to right deck's position
+    const deck3Active = state.isDeckButtonActive(2);
+    const deck4Active = state.isDeckButtonActive(3);
+    const leftDeck = deck3Active ? 3 : 1;
+    const rightDeck = deck4Active ? 4 : 2;
+
+    console.log(`🔗 SYNC RIGHT: leftDeck=${leftDeck}, rightDeck=${rightDeck}`);
+
+    // Get the loaded song for the left deck
+    const leftSong = activeTracks.getTrack(leftDeck);
+    if (!leftSong) {
+      console.log(`⚠️  No song loaded on Deck ${leftDeck}`);
+      return;
+    }
+
+    const leftAudioDeck = leftDeck - 1;
+    const rightAudioDeck = rightDeck - 1;
+
+    // Get current state of right deck
+    const rightState = audioPlayer.getCurrentPlaybackState(rightAudioDeck);
+    if (!rightState) {
+      console.log(`⚠️  Deck ${rightDeck} is not playing`);
+      return;
+    }
+
+    // Check tempo match
+    if (rightState.song.bpm !== leftSong.bpm) {
+      console.log(`⚠️  Tempo mismatch: Deck ${rightDeck} (${rightState.song.bpm} BPM) vs Deck ${leftDeck} (${leftSong.bpm} BPM)`);
+      return;
+    }
+
+    // Sync left deck to right deck's position
+    const beatsPerSecond = leftSong.bpm / 60;
+    const positionInBeats = rightState.position * beatsPerSecond;
+    console.log(`🔗 Syncing Deck ${leftDeck} to Deck ${rightDeck}: ${rightState.section} at ${positionInBeats.toFixed(2)} beats`);
+    audioPlayer.play(leftSong, leftAudioDeck, rightState.section, positionInBeats);
   }
 }
 
@@ -344,12 +492,85 @@ function handleSpindown(spindownData) {
 }
 
 /**
+ * Handle sync state change - sync deck playback when SYNC is pressed
+ */
+function handleSyncChange(syncData) {
+  const { deck, synced } = syncData;
+  console.log(`🔗 SYNC pressed: Deck ${deck}, synced=${synced}`);
+
+  // Sync immediately on every SYNC button press (ignore toggle state)
+  // if (!synced) {
+  //   return;
+  // }
+
+  // Determine left and right decks based on deck button states
+  const deck3Active = state.isDeckButtonActive(2);
+  const deck4Active = state.isDeckButtonActive(3);
+  const leftDeck = deck3Active ? 3 : 1;
+  const rightDeck = deck4Active ? 4 : 2;
+
+  let sourceDeck, targetDeck;
+
+  // If left deck (1 or 3) pressed SYNC, sync right deck to left
+  if (deck === leftDeck) {
+    sourceDeck = leftDeck;
+    targetDeck = rightDeck;
+    console.log(`🔗 SYNC LEFT: Syncing Deck ${targetDeck} to Deck ${sourceDeck}`);
+  }
+  // If right deck (2 or 4) pressed SYNC, sync left deck to right
+  else if (deck === rightDeck) {
+    sourceDeck = rightDeck;
+    targetDeck = leftDeck;
+    console.log(`🔗 SYNC RIGHT: Syncing Deck ${targetDeck} to Deck ${sourceDeck}`);
+  } else {
+    return;
+  }
+
+  // Get the loaded songs for both decks
+  const targetSong = activeTracks.getTrack(targetDeck);
+  if (!targetSong) {
+    console.log(`⚠️  No song loaded on Deck ${targetDeck}`);
+    return;
+  }
+
+  const sourceAudioDeck = sourceDeck - 1;
+  const targetAudioDeck = targetDeck - 1;
+
+  // Get current state of source deck
+  const sourceState = audioPlayer.getCurrentPlaybackState(sourceAudioDeck);
+  if (!sourceState) {
+    console.log(`⚠️  Deck ${sourceDeck} is not playing`);
+    return;
+  }
+
+  // Check tempo match
+  if (sourceState.song.bpm !== targetSong.bpm) {
+    console.log(`⚠️  Tempo mismatch: Deck ${sourceDeck} (${sourceState.song.bpm} BPM) vs Deck ${targetDeck} (${targetSong.bpm} BPM)`);
+    return;
+  }
+
+  // Sync target deck to source deck's position
+  const beatsPerSecond = targetSong.bpm / 60;
+  const positionInBeats = sourceState.position * beatsPerSecond;
+  console.log(`🔗 Syncing: ${sourceState.section} at ${positionInBeats.toFixed(2)} beats`);
+  audioPlayer.play(targetSong, targetAudioDeck, sourceState.section, positionInBeats);
+}
+
+/**
  * Handle performance pad press for audio playback
  * Left pads control Deck 1/3, Right pads control Deck 2/4
  * Based on DECK button state
  */
 function handlePadPress(padData) {
   const { channel, note, deck } = padData;
+
+  // Update UI to turn on the pad LED
+  const padButtonId = `button-${note}-ch${channel}`;
+  if (state.hasControl(padButtonId)) {
+    const control = state.getControl(padButtonId);
+    state.updateButton(padButtonId, true);
+    ui.updateButton(control.element, true, false, false, false);
+  }
 
   // Determine which deck to control based on pad channel and DECK button state
   // channel 7 = left pads (Deck A) → controls Deck 1 or 3
@@ -372,6 +593,22 @@ function handlePadPress(padData) {
   const loadedSong = activeTracks.getTrack(targetDeck);
   if (!loadedSong) {
     console.log(`⚠️ No track loaded on Deck ${targetDeck}`);
+    return;
+  }
+
+  // Check active mode for this deck
+  const activeMode = state.getActiveModeForChannel(channel === 7 ? 0 : 1);
+  console.log(`🎮 Active mode for channel ${channel === 7 ? 0 : 1}: ${activeMode} (${getModeName(activeMode)})`);
+
+  // ROLL MODE (30): Loop small sections based on pad
+  if (activeMode === 30) {
+    const rollBeats = [2, 1, 0.5, 0.25, 0.125, 0.0625, 0.03125, 0.015625][note];
+    if (rollBeats !== undefined) {
+      const audioDeck = targetDeck - 1;
+      console.log(`🔁 Starting roll: Deck ${targetDeck}, Pad ${note + 1}, ${rollBeats} beats`);
+      audioPlayer.startRoll(audioDeck, rollBeats, loadedSong);
+      console.log(`🔁 Pad ${note + 1} (Deck ${targetDeck}): Roll ${rollBeats} beats`);
+    }
     return;
   }
 
@@ -413,8 +650,47 @@ function handlePadPress(padData) {
     return;
   }
 
+  // HOT CUE MODE (27): Play specific sections
   // Play on the target deck (map deck 1-4 to audio deck 0-3)
   const audioDeck = targetDeck - 1;
   audioPlayer.play(loadedSong, audioDeck, section, position);
   console.log(`▶️  Deck ${targetDeck}: "${loadedSong.title}"`);
+}
+
+/**
+ * Handle performance pad release
+ * Stops roll effect when pad is released in ROLL mode
+ */
+function handlePadRelease(padData) {
+  const { channel, note, deck } = padData;
+
+  // Update UI to turn off the pad LED
+  const padButtonId = `button-${note}-ch${channel}`;
+  if (state.hasControl(padButtonId)) {
+    const control = state.getControl(padButtonId);
+    state.updateButton(padButtonId, false);
+    ui.updateButton(control.element, false, false, false, false);
+  }
+
+  // Determine which deck to control
+  let targetDeck;
+  if (channel === 7) {
+    const deck3Active = state.isDeckButtonActive(2);
+    targetDeck = deck3Active ? 3 : 1;
+  } else if (channel === 8) {
+    const deck4Active = state.isDeckButtonActive(3);
+    targetDeck = deck4Active ? 4 : 2;
+  } else {
+    return;
+  }
+
+  // Check active mode for this deck
+  const activeMode = state.getActiveModeForChannel(channel === 7 ? 0 : 1);
+
+  // ROLL MODE (30): Stop roll on release
+  if (activeMode === 30) {
+    const audioDeck = targetDeck - 1;
+    audioPlayer.stopRoll(audioDeck);
+    console.log(`🔁 Pad ${note + 1} (Deck ${targetDeck}): Roll stopped`);
+  }
 }
