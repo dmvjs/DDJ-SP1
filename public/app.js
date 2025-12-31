@@ -158,6 +158,12 @@ function handleButtonEvent(control, event) {
     handleSlipButton(control.id);
   }
 
+  // Handle SHIFT + SLIP (button-99) - unload track from deck
+  if (event.pressed && (control.id === 'button-99-ch0' || control.id === 'button-99-ch1' ||
+                         control.id === 'button-99-ch2' || control.id === 'button-99-ch3')) {
+    handleUnloadButton(control.id);
+  }
+
   // Handle CENSOR buttons - reverse playback
   // Support all 4 deck channels (0, 1, 2, 3)
   if (control.id === 'button-21-ch0' || control.id === 'button-21-ch1' ||
@@ -174,6 +180,30 @@ function handleButtonEvent(control, event) {
   if (event.pressed && (control.id === 'button-88-ch0' || control.id === 'button-88-ch1' ||
                          control.id === 'button-88-ch2' || control.id === 'button-88-ch3')) {
     handleSyncButton(control.id);
+  }
+
+  // Handle FX buttons (echo effect)
+  // FX1-1 ON: button-71-ch4 (left), button-71-ch5 (right)
+  const isFXButton = control.id.match(/button-71-ch([45])/);
+  if (isFXButton) {
+    const channel = parseInt(isFXButton[1]);
+    const deck = channel === 4 ? 0 : 1; // ch4 = deck 0/2, ch5 = deck 1/3
+
+    // Check if SHIFT is pressed for latching
+    const isShifted = state.isShiftPressed && state.isShiftPressed();
+
+    if (event.pressed) {
+      // Button pressed - enable echo
+      audioPlayer.setEchoEnabled(deck, true);
+      audioPlayer.setEchoEnabled(deck + 2, true); // Also enable for alternate deck
+      console.log(`🔊 FX button pressed (${isShifted ? 'SHIFT+' : ''}tap): Deck ${deck + 1}/${deck + 3} echo ON`);
+    } else if (!isShifted) {
+      // Button released (momentary mode) - disable echo
+      audioPlayer.setEchoEnabled(deck, false);
+      audioPlayer.setEchoEnabled(deck + 2, false);
+      console.log(`🔊 FX button released (momentary): Deck ${deck + 1}/${deck + 3} echo OFF`);
+    }
+    // If shifted, leave echo on (latched)
   }
 }
 
@@ -261,6 +291,30 @@ function handleSlipButton(buttonId) {
     audioPlayer.fadeOut(audioDeck, 0.2); // 200ms fadeout
     console.log(`💫 SLIP pressed: Fading out Deck ${targetDeck}`);
   }
+}
+
+/**
+ * Handle SHIFT + SLIP (button-99) to unload track from deck
+ * Supports all 4 deck channels (0-3)
+ */
+function handleUnloadButton(buttonId) {
+  // Extract channel from button ID (button-99-ch0 -> channel 0)
+  const match = buttonId.match(/ch(\d+)/);
+  if (!match) return;
+
+  const channel = parseInt(match[1]);
+
+  // Map channel directly to deck (channel 0=deck 1, 1=deck 2, 2=deck 3, 3=deck 4)
+  const targetDeck = channel + 1;
+  const audioDeck = targetDeck - 1; // Convert deck 1-4 to audio deck 0-3
+
+  // Stop playback
+  audioPlayer.stop(audioDeck);
+
+  // Unload track from ActiveTracks
+  activeTracks.loadTrack(targetDeck, null);
+
+  console.log(`🗑️  SHIFT + SLIP: Unloaded track from Deck ${targetDeck}`);
 }
 
 /**
@@ -415,6 +469,42 @@ function handleKnobEvent(control, event, key) {
     }
 
     return; // Skip default knob handling
+  }
+
+  // FX knob handling for echo effect
+  // FX1 (left side, channel 4) controls decks 1/3, FX2 (right side, channel 5) controls decks 2/4
+  const isFXKnob = control.id.match(/knob-([0246])-ch([45])/);
+  if (isFXKnob) {
+    const knobNum = parseInt(isFXKnob[1]);
+    const channel = parseInt(isFXKnob[2]);
+    const deck = channel === 4 ? 0 : 1; // ch4 = deck 0/2, ch5 = deck 1/3 (will handle deck switching later)
+
+    // BEATS knob (knob-0): Controls echo time (1 beat, 1/2 beat)
+    if (knobNum === 0) {
+      const currentTempo = state.getTempo();
+      // Map MIDI value to beats: 0-63 = 1 beat, 64-127 = 1/2 beat
+      const beats = event.value < 64 ? 1 : 0.5;
+      audioPlayer.setEchoTime(deck, beats, currentTempo);
+      audioPlayer.setEchoTime(deck + 2, beats, currentTempo); // Also set for alternate deck (e.g., deck 2 if deck 0)
+    }
+
+    // FX1 knob (knob-2): Controls echo level/mix
+    if (knobNum === 2) {
+      audioPlayer.setEchoLevel(deck, event.value);
+      audioPlayer.setEchoLevel(deck + 2, event.value);
+    }
+
+    // FX2 knob (knob-4): Controls echo feedback
+    if (knobNum === 4) {
+      audioPlayer.setEchoFeedback(deck, event.value);
+      audioPlayer.setEchoFeedback(deck + 2, event.value);
+    }
+
+    // FX3 knob (knob-6): Controls echo filter
+    if (knobNum === 6) {
+      audioPlayer.setEchoFilter(deck, event.value);
+      audioPlayer.setEchoFilter(deck + 2, event.value);
+    }
   }
 
   // Check if this is a slider

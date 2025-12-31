@@ -295,6 +295,9 @@ export class DeviceManager extends EventEmitter {
 
     // Handle button presses (Note On/Off)
     this.input.on('noteon', (msg: any) => {
+      // LOG ALL NOTEON EVENTS FOR DEBUGGING
+      console.log(`🔘 NOTEON: ch${msg.channel} note${msg.note} vel${msg.velocity}`);
+
       // Check if this is a pad release (velocity 0)
       if (this.stateManager.isPerformancePad(msg.channel) && msg.velocity === 0) {
         console.log('🎹 PAD RELEASE (noteon vel=0):', `ch${msg.channel}`, `note${msg.note}`);

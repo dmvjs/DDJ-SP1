@@ -10,13 +10,51 @@ export class AudioPlayer {
     // Create Web Audio context
     this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-    // Create gain nodes for each deck
+    // Create gain nodes and echo effects for each deck
     this.deckGains = new Map(); // key: deck (0-3), value: GainNode
+    this.echoEffects = new Map(); // key: deck (0-3), value: { delay, feedback, wet, dry, filter }
+
     for (let i = 0; i < 4; i++) {
+      // Main deck gain (master output)
       const gainNode = this.audioContext.createGain();
       gainNode.connect(this.audioContext.destination);
       gainNode.gain.value = 1.0; // Default full volume
       this.deckGains.set(i, gainNode);
+
+      // Echo effect chain for this deck
+      const delay = this.audioContext.createDelay(5.0); // Max 5 seconds delay
+      const feedbackGain = this.audioContext.createGain();
+      const wetGain = this.audioContext.createGain();
+      const dryGain = this.audioContext.createGain();
+      const filter = this.audioContext.createBiquadFilter();
+
+      // Configure filter (low-pass for warmer echo)
+      filter.type = 'lowpass';
+      filter.frequency.value = 8000; // Hz
+
+      // Set initial values
+      delay.delayTime.value = 0.5; // 0.5 seconds (1 beat at 120 BPM)
+      feedbackGain.gain.value = 0.5; // 50% feedback (moderate repeats)
+      wetGain.gain.value = 0; // No effect by default
+      dryGain.gain.value = 1.0; // Full dry signal
+
+      // Connect echo chain: delay → filter → feedback → delay (feedback loop)
+      delay.connect(filter);
+      filter.connect(feedbackGain);
+      feedbackGain.connect(delay); // Feedback loop
+      filter.connect(wetGain); // Wet output
+      wetGain.connect(gainNode);
+
+      // Dry signal goes straight to deck gain
+      dryGain.connect(gainNode);
+
+      this.echoEffects.set(i, {
+        delay,
+        feedback: feedbackGain,
+        wet: wetGain,
+        dry: dryGain,
+        filter
+      });
     }
 
     // Track currently playing sources for each deck
@@ -170,9 +208,10 @@ export class AudioPlayer {
       const source = this.audioContext.createBufferSource();
       source.buffer = audioBuffer;
 
-      // Connect to deck's gain node (for volume control)
-      const gainNode = this.deckGains.get(deck);
-      source.connect(gainNode);
+      // Connect through echo effect chain
+      const echo = this.echoEffects.get(deck);
+      source.connect(echo.dry); // Dry signal
+      source.connect(echo.delay); // Wet signal (into delay)
 
       // Store the source so we can stop it later
       this.activeSources.set(deck, source);
@@ -221,7 +260,7 @@ export class AudioPlayer {
     if (source) {
       try {
         source.stop();
-        source.disconnect();
+        // Don't disconnect - let echo tail continue!
       } catch (error) {
         // Source might already be stopped
       }
@@ -402,7 +441,7 @@ export class AudioPlayer {
     if (currentSource) {
       try {
         currentSource.stop();
-        currentSource.disconnect();
+        // Don't disconnect - let echo tail continue!
       } catch (e) {
         // Already stopped
       }
@@ -436,8 +475,10 @@ export class AudioPlayer {
       source.loopStart = currentPosition;
       source.loopEnd = Math.min(currentPosition + rollDuration, audioBuffer.duration);
 
-      const gainNode = this.deckGains.get(deck);
-      source.connect(gainNode);
+      // Connect through echo effect chain
+      const echo = this.echoEffects.get(deck);
+      source.connect(echo.dry); // Dry signal
+      source.connect(echo.delay); // Wet signal (into delay)
 
       this.activeSources.set(deck, source);
 
@@ -482,7 +523,7 @@ export class AudioPlayer {
     if (source) {
       try {
         source.stop();
-        source.disconnect();
+        // Don't disconnect - let echo tail continue!
       } catch (e) {
         // Already stopped
       }
@@ -547,7 +588,7 @@ export class AudioPlayer {
     if (currentSource) {
       try {
         currentSource.stop();
-        currentSource.disconnect();
+        // Don't disconnect - let echo tail continue!
       } catch (e) {
         // Already stopped
       }
@@ -588,8 +629,10 @@ export class AudioPlayer {
       const source = this.audioContext.createBufferSource();
       source.buffer = reversedBuffer;
 
-      const gainNode = this.deckGains.get(deck);
-      source.connect(gainNode);
+      // Connect through echo effect chain
+      const echo = this.echoEffects.get(deck);
+      source.connect(echo.dry); // Dry signal
+      source.connect(echo.delay); // Wet signal (into delay)
 
       this.activeSources.set(deck, source);
 
@@ -697,7 +740,7 @@ export class AudioPlayer {
     if (source) {
       try {
         source.stop();
-        source.disconnect();
+        // Don't disconnect - let echo tail continue!
       } catch (e) {
         // Already stopped
       }
@@ -724,5 +767,92 @@ export class AudioPlayer {
       console.log(`▶️  Resuming: ${savedSong.title} (${savedSection}) at beat ${resumeBeats.toFixed(2)}`);
       this.play(savedSong, deck, savedSection, resumeBeats);
     }
+  }
+
+  /**
+   * Set echo delay time based on beats and BPM
+   * @param {number} deck - Deck number (0-3)
+   * @param {number} beats - Delay time in beats (e.g., 1, 0.5, 0.25)
+   * @param {number} bpm - Current tempo
+   */
+  setEchoTime(deck, beats, bpm) {
+    const echo = this.echoEffects.get(deck);
+    if (!echo) return;
+
+    // Calculate delay time in seconds
+    const secondsPerBeat = 60 / bpm;
+    const delayTime = secondsPerBeat * beats;
+
+    echo.delay.delayTime.setValueAtTime(delayTime, this.audioContext.currentTime);
+    console.log(`🔊 Echo time: Deck ${deck + 1} = ${beats} beats @ ${bpm} BPM = ${delayTime.toFixed(3)}s`);
+  }
+
+  /**
+   * Set echo feedback amount (how many repeats)
+   * @param {number} deck - Deck number (0-3)
+   * @param {number} value - MIDI value (0-127)
+   */
+  setEchoFeedback(deck, value) {
+    const echo = this.echoEffects.get(deck);
+    if (!echo) return;
+
+    // Convert MIDI value to feedback gain (0-0.9, capped to prevent runaway feedback)
+    const feedback = Math.min((value / 127) * 0.9, 0.9);
+    echo.feedback.gain.setValueAtTime(feedback, this.audioContext.currentTime);
+    console.log(`🔊 Echo feedback: Deck ${deck + 1} = ${Math.round(feedback * 100)}%`);
+  }
+
+  /**
+   * Set echo wet/dry mix level
+   * @param {number} deck - Deck number (0-3)
+   * @param {number} value - MIDI value (0-127)
+   */
+  setEchoLevel(deck, value) {
+    const echo = this.echoEffects.get(deck);
+    if (!echo) return;
+
+    // Convert MIDI value to wet gain (0-1)
+    const wetLevel = value / 127;
+    echo.wet.gain.setValueAtTime(wetLevel, this.audioContext.currentTime);
+    console.log(`🔊 Echo level: Deck ${deck + 1} = ${Math.round(wetLevel * 100)}%`);
+  }
+
+  /**
+   * Set echo filter frequency (tone control)
+   * @param {number} deck - Deck number (0-3)
+   * @param {number} value - MIDI value (0-127)
+   */
+  setEchoFilter(deck, value) {
+    const echo = this.echoEffects.get(deck);
+    if (!echo) return;
+
+    // Convert MIDI value to frequency (200Hz - 12000Hz)
+    const frequency = 200 + (value / 127) * 11800;
+    echo.filter.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+    console.log(`🔊 Echo filter: Deck ${deck + 1} = ${Math.round(frequency)}Hz`);
+  }
+
+  /**
+   * Enable or disable echo effect
+   * @param {number} deck - Deck number (0-3)
+   * @param {boolean} enabled - True to enable, false to disable
+   */
+  setEchoEnabled(deck, enabled) {
+    const echo = this.echoEffects.get(deck);
+    if (!echo) return;
+
+    if (enabled) {
+      // Fade in wet signal smoothly
+      echo.wet.gain.cancelScheduledValues(this.audioContext.currentTime);
+      echo.wet.gain.setValueAtTime(echo.wet.gain.value, this.audioContext.currentTime);
+      echo.wet.gain.linearRampToValueAtTime(0.5, this.audioContext.currentTime + 0.05);
+    } else {
+      // Fade out wet signal smoothly
+      echo.wet.gain.cancelScheduledValues(this.audioContext.currentTime);
+      echo.wet.gain.setValueAtTime(echo.wet.gain.value, this.audioContext.currentTime);
+      echo.wet.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.05);
+    }
+
+    console.log(`🔊 Echo: Deck ${deck + 1} ${enabled ? 'ON' : 'OFF'}`);
   }
 }

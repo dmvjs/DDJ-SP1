@@ -45,8 +45,22 @@ export class SongList {
    * Set reference key (from Deck 1's loaded track)
    */
   setReferenceKey(key) {
+    // Remember the currently selected song before reordering
+    const currentlySelectedSong = this.getSelectedSong();
+
     this.referenceKey = key;
-    this.selectedIndex = 0;
+
+    // If we had a song selected, find it in the reordered list
+    if (currentlySelectedSong) {
+      const reorderedSongs = this.getFilteredSongs();
+      const newIndex = reorderedSongs.findIndex(song => song.id === currentlySelectedSong.id);
+
+      // If found, keep that song selected; otherwise reset to 0
+      this.selectedIndex = newIndex >= 0 ? newIndex : 0;
+    } else {
+      this.selectedIndex = 0;
+    }
+
     this.render();
   }
 

@@ -55,6 +55,7 @@ export const DDJ_SP1_LAYOUT = [
     // Deck A - Middle Button Row (Deck 1 = Channel 0 in 0-indexed, Channel 1 in spec)
     { id: 'button-88-ch0', type: 'button', channel: 0, number: 88, label: 'SYNC', section: 'deck-a-buttons' },
     { id: 'button-64-ch0', type: 'button', channel: 0, number: 64, label: 'STOP', section: 'deck-a-buttons' },
+    { id: 'button-99-ch0', type: 'button', channel: 0, number: 99, label: 'UNLOAD', section: 'deck-a-buttons' },
     { id: 'button-21-ch0', type: 'button', channel: 0, number: 21, label: 'CENSOR', section: 'deck-a-buttons' },
     { id: 'button-param-left-ch0', type: 'button', channel: 0, number: 200, label: 'PARAM.1', section: 'deck-a-buttons' },
     { id: 'button-param-right-ch0', type: 'button', channel: 0, number: 201, label: 'PARAM.1', section: 'deck-a-buttons' },
@@ -72,6 +73,7 @@ export const DDJ_SP1_LAYOUT = [
     // Deck B - Middle Button Row (Deck 2 = Channel 1 in 0-indexed, Channel 2 in spec)
     { id: 'button-88-ch1', type: 'button', channel: 1, number: 88, label: 'SYNC', section: 'deck-b-buttons' },
     { id: 'button-64-ch1', type: 'button', channel: 1, number: 64, label: 'STOP', section: 'deck-b-buttons' },
+    { id: 'button-99-ch1', type: 'button', channel: 1, number: 99, label: 'UNLOAD', section: 'deck-b-buttons' },
     { id: 'button-21-ch1', type: 'button', channel: 1, number: 21, label: 'CENSOR', section: 'deck-b-buttons' },
     { id: 'button-param-left-ch1', type: 'button', channel: 1, number: 200, label: 'PARAM.1', section: 'deck-b-buttons' },
     { id: 'button-param-right-ch1', type: 'button', channel: 1, number: 201, label: 'PARAM.1', section: 'deck-b-buttons' },
@@ -84,6 +86,7 @@ export const DDJ_SP1_LAYOUT = [
     // Deck 3 - Control Buttons (Channel 2) - not displayed in UI, only for MIDI detection
     { id: 'button-88-ch2', type: 'button', channel: 2, number: 88, label: 'SYNC', section: 'deck-a-buttons' },
     { id: 'button-64-ch2', type: 'button', channel: 2, number: 64, label: 'STOP', section: 'deck-a-buttons' },
+    { id: 'button-99-ch2', type: 'button', channel: 2, number: 99, label: 'UNLOAD', section: 'deck-a-buttons' },
     { id: 'button-21-ch2', type: 'button', channel: 2, number: 21, label: 'CENSOR', section: 'deck-a-buttons' },
     { id: 'knob-23-ch2', type: 'knob', channel: 2, number: 23, label: 'VOLUME', section: 'deck-a-buttons' },
     { id: 'button-27-ch2', type: 'button', channel: 2, number: 27, label: 'HOT CUE', section: 'deck-a-buttons' },
@@ -93,6 +96,7 @@ export const DDJ_SP1_LAYOUT = [
     // Deck 4 - Control Buttons (Channel 3) - not displayed in UI, only for MIDI detection
     { id: 'button-88-ch3', type: 'button', channel: 3, number: 88, label: 'SYNC', section: 'deck-b-buttons' },
     { id: 'button-64-ch3', type: 'button', channel: 3, number: 64, label: 'STOP', section: 'deck-b-buttons' },
+    { id: 'button-99-ch3', type: 'button', channel: 3, number: 99, label: 'UNLOAD', section: 'deck-b-buttons' },
     { id: 'button-21-ch3', type: 'button', channel: 3, number: 21, label: 'CENSOR', section: 'deck-b-buttons' },
     { id: 'knob-23-ch3', type: 'knob', channel: 3, number: 23, label: 'VOLUME', section: 'deck-b-buttons' },
     { id: 'button-27-ch3', type: 'button', channel: 3, number: 27, label: 'HOT CUE', section: 'deck-b-buttons' },
