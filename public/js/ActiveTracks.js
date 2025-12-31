@@ -21,8 +21,12 @@ export class ActiveTracks {
    * Load a song into a deck
    */
   loadTrack(deck, song) {
+    console.log(`📥 ActiveTracks.loadTrack: deck=${deck}, song=${song?.title}`);
+    console.log(`   Before:`, this.tracks);
     this.tracks[deck] = song;
+    console.log(`   After:`, this.tracks);
     this.render();
+    console.log(`   ✓ Rendered`);
   }
 
   /**

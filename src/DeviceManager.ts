@@ -48,19 +48,41 @@ export class DeviceManager extends EventEmitter {
   }
 
   /**
+   * Get the active deck number (1-4) from a performance pad channel
+   * Handles both direct pad channels (9, 10 for decks 3, 4) and
+   * DECK button-switched channels (7, 8 for decks 1/3 or 2/4)
+   */
+  private getActiveDeckFromChannel(channel: number): number {
+    if (channel === 9) return 3;
+    if (channel === 10) return 4;
+    if (channel === 7) {
+      const deck3Active = this.stateManager.isDeckButtonOn(2, 114);
+      return deck3Active ? 3 : 1;
+    }
+    if (channel === 8) {
+      const deck4Active = this.stateManager.isDeckButtonOn(3, 114);
+      return deck4Active ? 4 : 2;
+    }
+    return 1; // Default
+  }
+
+  /**
    * Initialize LEDs on device connection
-   * Sets HOT CUE mode as active on both decks
+   * Sets HOT CUE mode as active on all 4 decks
    */
   private initializeLEDs(): void {
     if (!this.output) return;
 
-    // Light up HOT CUE button (note 27) on both channels
-    this.setLED(0, 27, 127); // Left (Deck 1)
-    this.setLED(1, 27, 127); // Right (Deck 2)
+    // Light up HOT CUE button (note 27) on all 4 deck channels
+    // Mode buttons are on performance pad channels: 7, 8, 9, 10 (decks 1, 2, 3, 4)
+    this.setLED(7, 27, 127); // Deck 1
+    this.setLED(8, 27, 127); // Deck 2
+    this.setLED(9, 27, 127); // Deck 3
+    this.setLED(10, 27, 127); // Deck 4
 
-    // Light up active pads for HOT CUE mode (1% brightness)
-    this.updatePadLEDsForChannel(0); // Left pads
-    this.updatePadLEDsForChannel(1); // Right pads
+    // Light up active pads for HOT CUE mode
+    this.updatePadLEDsForChannel(0); // Left pads (Deck 1)
+    this.updatePadLEDsForChannel(1); // Right pads (Deck 2)
 
     console.log('🎮 Initialized: HOT CUE mode active on all decks');
   }
@@ -68,14 +90,12 @@ export class DeviceManager extends EventEmitter {
   /**
    * Update performance pad LEDs for a channel based on current deck's mode
    * @param channel - 0 for left pads, 1 for right pads
-   * @param deckButtonChannel - Optional: 2 or 3 for deck 3/4, use this channel for LEDs too
    */
-  private updatePadLEDsForChannel(channel: number, deckButtonChannel?: number): void {
+  private updatePadLEDsForChannel(channel: number): void {
     if (!this.output) return;
 
     // Determine which deck (1-4) is currently active for this channel
     let activeDeck: number;
-    const isDeck3or4 = deckButtonChannel !== undefined;
     if (channel === 0) {
       const deck3Active = this.stateManager.isDeckButtonOn(2, 114);
       activeDeck = deck3Active ? 3 : 1;
@@ -87,15 +107,15 @@ export class DeviceManager extends EventEmitter {
     // Get the active mode for this deck
     const activeMode = this.stateManager.getActiveMode(activeDeck);
 
-    // Map channel 0/1 (mode buttons) to channel 7/8 (performance pads)
-    const padChannel = channel === 0 ? 7 : 8;
+    // Map deck to pad channel:
+    // Deck 1 → Channel 7, Deck 2 → Channel 8, Deck 3 → Channel 9, Deck 4 → Channel 10
+    const padChannel = activeDeck === 1 ? 7 : activeDeck === 2 ? 8 : activeDeck === 3 ? 9 : 10;
 
-    // Turn off all pads first (try both pad channel and deck button channel)
+    console.log(`   📡 updatePadLEDsForChannel: channel=${channel}, activeDeck=${activeDeck}, padChannel=${padChannel}, mode=${activeMode}`);
+
+    // Turn off all pads first on the correct pad channel
     for (let i = 0; i < 8; i++) {
       this.setLED(padChannel, i, 0);
-      if (deckButtonChannel && isDeck3or4) {
-        this.setLED(deckButtonChannel, i, 0);
-      }
     }
 
     // Light up specific pads based on mode
@@ -112,15 +132,6 @@ export class DeviceManager extends EventEmitter {
       const pads = [0, 1, 2, 3, 4, 5, 6, 7];
       console.log(`      Setting HOT CUE pads: ch${padChannel} notes [0-7] vel 2`);
       pads.forEach(pad => this.setLED(padChannel, pad, 2));
-
-      // For deck 3/4, try sending pads on BOTH deck button channel AND mode button channel
-      if (deckButtonChannel && isDeck3or4) {
-        console.log(`      ALSO trying pads on DECK ch${deckButtonChannel} notes [0-7] vel 2`);
-        pads.forEach(pad => this.setLED(deckButtonChannel, pad, 2));
-
-        console.log(`      ALSO trying pads on MODE BUTTON ch${channel} notes [0-7] vel 2`);
-        pads.forEach(pad => this.setLED(channel, pad, 2));
-      }
     }
     // Add other modes here as needed (ROLL, SLICER, SAMPLER)
   }
@@ -131,24 +142,22 @@ export class DeviceManager extends EventEmitter {
   public syncModeLEDs(): void {
     if (!this.output) return;
 
-    // Get current mode for each channel based on active deck
-    const leftMode = this.stateManager.getActiveModeForChannel(0);
-    const rightMode = this.stateManager.getActiveModeForChannel(1);
-
-    // Update mode button LEDs for left channel
     const modeButtons = this.stateManager.getModeButtons();
-    modeButtons.forEach(btn => {
-      this.setLED(0, btn, btn === leftMode ? 127 : 0);
-    });
 
-    // Update mode button LEDs for right channel
-    modeButtons.forEach(btn => {
-      this.setLED(1, btn, btn === rightMode ? 127 : 0);
-    });
+    // Update mode button LEDs for all 4 decks
+    // Mode buttons are on channels 7, 8, 9, 10 (decks 1, 2, 3, 4)
+    for (let deck = 1; deck <= 4; deck++) {
+      const padChannel = deck + 6; // Deck 1→ch7, Deck 2→ch8, Deck 3→ch9, Deck 4→ch10
+      const activeMode = this.stateManager.getActiveMode(deck);
+
+      modeButtons.forEach(btn => {
+        this.setLED(padChannel, btn, btn === activeMode ? 127 : 0);
+      });
+    }
 
     // Update pad LEDs based on active deck's mode
-    this.updatePadLEDsForChannel(0); // Left pads
-    this.updatePadLEDsForChannel(1); // Right pads
+    this.updatePadLEDsForChannel(0); // Left pads (Deck 1 or 3)
+    this.updatePadLEDsForChannel(1); // Right pads (Deck 2 or 4)
 
     console.log('🔄 Synced mode LEDs to device');
   }
@@ -244,15 +253,8 @@ export class DeviceManager extends EventEmitter {
       if (this.stateManager.isPerformancePad(msg.channel) && msg.velocity === 0) {
         console.log('🎹 PAD RELEASE (noteon vel=0):', `ch${msg.channel}`, `note${msg.note}`);
 
-        // Determine which deck based on DECK button state
-        let activeDeck: number;
-        if (msg.channel === 7) {
-          const deck3Active = this.stateManager.isDeckButtonOn(2, 114);
-          activeDeck = deck3Active ? 3 : 1;
-        } else {
-          const deck4Active = this.stateManager.isDeckButtonOn(3, 114);
-          activeDeck = deck4Active ? 4 : 2;
-        }
+        // Determine which deck from channel (handles all 4 decks)
+        const activeDeck = this.getActiveDeckFromChannel(msg.channel);
 
         // Emit pad release event
         this.emit('padRelease', {
@@ -263,20 +265,18 @@ export class DeviceManager extends EventEmitter {
         return;
       }
 
-      // DEBUG: Log ALL pad messages to debug deck 3/4 pad LED issue
-      if ((msg.channel === 7 || msg.channel === 8) && msg.velocity > 0) {
-        console.log('🎹 PAD PRESS:', `ch${msg.channel}`, `note${msg.note}`, `vel${msg.velocity}`);
-      }
-
-      // TEMP: Log all channel 6 button presses to find FX ASSIGN buttons
-      if (msg.channel === 6 && msg.velocity > 0) {
-        console.log('🔵 CH6 BUTTON:', `note=${msg.note}`, `velocity=${msg.velocity}`);
+      // DEBUG: Log ALL pad messages for all 4 decks
+      if (this.stateManager.isPerformancePad(msg.channel) && msg.velocity > 0) {
+        const deck = this.getActiveDeckFromChannel(msg.channel);
+        console.log('🎹 PAD PRESS:', `ch${msg.channel}`, `deck${deck}`, `note${msg.note}`, `vel${msg.velocity}`);
       }
 
       // Check if this is the SHIFT button (button-64-ch6)
+      // Note: SHIFT state is tracked for UI purposes, but the hardware sends different
+      // CC messages (e.g., CC 55 instead of CC 23) when SHIFT is held
       if (msg.channel === 6 && msg.note === 64) {
         this.stateManager.setShiftPressed(msg.velocity > 0);
-        console.log('⬆️  SHIFT:', this.stateManager.isShiftPressed() ? 'PRESSED' : 'RELEASED');
+        console.log(`⬆️  SHIFT: ${msg.velocity > 0 ? 'PRESSED' : 'RELEASED'}`);
       }
 
       // Check if this is an FX ASSIGN button
@@ -295,7 +295,7 @@ export class DeviceManager extends EventEmitter {
       if (isModeButton) {
         const modeChange = this.stateManager.handleModeButtonPress(msg.channel, msg.note, msg.velocity);
         if (modeChange) {
-          // Turn off all mode button LEDs for this channel
+          // Turn off all mode button LEDs for this pad channel
           const modeButtons = this.stateManager.getModeButtons();
           modeButtons.forEach(btn => {
             this.setLED(msg.channel, btn, 0);
@@ -304,8 +304,9 @@ export class DeviceManager extends EventEmitter {
           // Turn on only the active mode button LED
           this.setLED(msg.channel, modeChange.activeMode, 127);
 
-          // Update performance pad LEDs for the new mode
-          this.updatePadLEDsForChannel(msg.channel);
+          // Update performance pad LEDs for the new mode (map deck to UI channel 0 or 1)
+          const uiChannel = (modeChange.deck === 1 || modeChange.deck === 3) ? 0 : 1;
+          this.updatePadLEDsForChannel(uiChannel);
 
           // Emit mode change event
           this.emit('modeChange', modeChange);
@@ -323,15 +324,8 @@ export class DeviceManager extends EventEmitter {
 
       // Handle performance pad press with LED feedback
       if (isPerformancePad && msg.velocity > 0) {
-        // Determine which deck based on DECK button state
-        let activeDeck: number;
-        if (msg.channel === 7) {
-          const deck3Active = this.stateManager.isDeckButtonOn(2, 114);
-          activeDeck = deck3Active ? 3 : 1;
-        } else {
-          const deck4Active = this.stateManager.isDeckButtonOn(3, 114);
-          activeDeck = deck4Active ? 4 : 2;
-        }
+        // Determine which deck from channel (handles all 4 decks)
+        const activeDeck = this.getActiveDeckFromChannel(msg.channel);
         const activeMode = this.stateManager.getActiveMode(activeDeck);
         console.log(`🎹 PAD ${msg.note} on deck ${activeDeck}: activeMode=${activeMode}`);
 
@@ -458,39 +452,31 @@ export class DeviceManager extends EventEmitter {
 
         // Update mode button LEDs and pad LEDs with a small delay
         // to give the hardware time to process the DECK button press
-        // Channel 2 = DECK 1/3 (controls left pads, channel 0)
-        // Channel 3 = DECK 2/4 (controls right pads, channel 1)
-        const padChannel = msg.channel === 2 ? 0 : 1;
+        // Mode buttons are on deck control channels (0, 1, 2, 3), NOT pad channels
+        // Channel 2 (DECK 1/3 button) controls mode LEDs on channel 0 or 2
+        // Channel 3 (DECK 2/4 button) controls mode LEDs on channel 1 or 3
+        const uiChannel = msg.channel === 2 ? 0 : 1;
+        const activeDeck = msg.channel === 2 ? (isOn ? 3 : 1) : (isOn ? 4 : 2);
+        // Mode buttons are on deck control channels: deck 1→ch0, deck 2→ch1, deck 3→ch2, deck 4→ch3
+        const modeButtonChannel = activeDeck - 1;
 
         setTimeout(() => {
           // Get the mode for the newly active deck
-          const activeMode = this.stateManager.getActiveModeForChannel(padChannel);
+          const activeMode = this.stateManager.getActiveMode(activeDeck);
 
-          // Try sending mode button LEDs on BOTH the mode button channel AND the DECK button channel
-          // Some controllers use different channels for LED control when deck 3/4 is active
+          // Send mode button LEDs on the correct deck control channel
           const modeButtons = this.stateManager.getModeButtons();
 
-          // Always send on the mode button channel (0 or 1)
-          console.log(`   📡 Setting mode button LEDs on channel ${padChannel}, activeMode=${activeMode} (${this.getModeName(activeMode)})`);
+          console.log(`   📡 Setting mode button LEDs on channel ${modeButtonChannel} (deck ${activeDeck}), activeMode=${activeMode} (${this.getModeName(activeMode)})`);
           modeButtons.forEach(btn => {
             const velocity = btn === activeMode ? 127 : 0;
-            console.log(`      LED: ch${padChannel} note${btn} vel${velocity}`);
-            this.setLED(padChannel, btn, velocity);
+            console.log(`      LED: ch${modeButtonChannel} note${btn} vel${velocity}`);
+            this.setLED(modeButtonChannel, btn, velocity);
           });
 
-          // ALSO try sending on the DECK button channel (2 or 3) for deck 3/4
-          if (isOn) {
-            console.log(`   📡 ALSO trying mode button LEDs on DECK channel ${msg.channel}`);
-            modeButtons.forEach(btn => {
-              const velocity = btn === activeMode ? 127 : 0;
-              console.log(`      LED: ch${msg.channel} note${btn} vel${velocity}`);
-              this.setLED(msg.channel, btn, velocity);
-            });
-          }
-
-          // Update pad LEDs (pass deck button channel for deck 3/4)
-          console.log(`   📡 Updating pad LEDs for channel ${padChannel}`);
-          this.updatePadLEDsForChannel(padChannel, isOn ? msg.channel : undefined);
+          // Update pad LEDs for the active deck
+          console.log(`   📡 Updating pad LEDs for UI channel ${uiChannel} (deck ${activeDeck})`);
+          this.updatePadLEDsForChannel(uiChannel);
         }, 50); // 50ms delay to let hardware process DECK button
 
         // Emit event with toggle state
@@ -525,14 +511,12 @@ export class DeviceManager extends EventEmitter {
           console.log(`🛑 Deck ${activeDeck} SPINDOWN (vinyl stop)`);
           this.emit('spindown', { deck: activeDeck });
         } else {
-          // Toggle sync state
-          const nowSynced = this.stateManager.toggleSync(activeDeck);
+          // Emit sync event on every button press to sync all other decks
+          console.log(`🔗 Emitting syncChange for Deck ${activeDeck}`);
+          this.emit('syncChange', { deck: activeDeck, synced: true });
 
-          // Update SYNC button LED
-          this.setLED(msg.channel, msg.note, nowSynced ? 127 : 0);
-
-          // Emit sync state change event
-          this.emit('syncChange', { deck: activeDeck, synced: nowSynced });
+          // Keep LED always lit for SYNC button
+          this.setLED(msg.channel, msg.note, 127);
         }
 
         return; // Skip normal event emission
@@ -580,17 +564,10 @@ export class DeviceManager extends EventEmitter {
     this.input.on('noteoff', (msg: any) => {
       console.log('🎹 PAD RELEASE (noteoff):', `ch${msg.channel}`, `note${msg.note}`, `vel${msg.velocity}`);
 
-      // Only handle performance pad releases (channels 7 & 8)
+      // Only handle performance pad releases (all 4 deck channels)
       if (this.stateManager.isPerformancePad(msg.channel)) {
-        // Determine which deck based on DECK button state
-        let activeDeck: number;
-        if (msg.channel === 7) {
-          const deck3Active = this.stateManager.isDeckButtonOn(2, 114);
-          activeDeck = deck3Active ? 3 : 1;
-        } else {
-          const deck4Active = this.stateManager.isDeckButtonOn(3, 114);
-          activeDeck = deck4Active ? 4 : 2;
-        }
+        // Determine which deck from channel (handles all 4 decks)
+        const activeDeck = this.getActiveDeckFromChannel(msg.channel);
 
         // Emit pad release event
         this.emit('padRelease', {
@@ -603,16 +580,28 @@ export class DeviceManager extends EventEmitter {
 
     // Handle knobs and dials (Control Change)
     this.input.on('cc', (msg: any) => {
-      // Check if this is a BEATS knob (tempo selector)
-      const isBeats = this.stateManager.isBeatsKnob(msg.channel, msg.controller);
+      // Check if this is SHIFT + volume knob (CC 55) = tempo control
+      // According to spec: volume knob sends CC 23 normally, CC 55 when SHIFT is held
+      const isShiftedVolumeKnob = msg.controller === 55 && (msg.channel >= 0 && msg.channel <= 3);
 
-      if (isBeats) {
-        console.log('   🎵 BEATS KNOB DETECTED - calling handleBeatsKnobChange');
+      if (isShiftedVolumeKnob) {
+        // SHIFT + Volume knob = tempo control
+        console.log(`🎵 SHIFT + VOLUME: ch${msg.channel} CC${msg.controller} value=${msg.value}`);
         const newTempo = this.stateManager.handleBeatsKnobChange(msg.channel, msg.value);
         if (newTempo !== null) {
           console.log(`🎵 TEMPO CHANGED: ${newTempo} BPM`);
           this.emit('tempoChange', { tempo: newTempo });
         }
+        return; // Don't emit normal knob event
+      }
+
+      // Check if this is SHIFT + rotary selector/browse knob (CC 100) = 10x scroll speed
+      // According to spec: browse knob sends CC 64 normally, CC 100 when SHIFT is held
+      const isShiftedBrowseKnob = msg.controller === 100 && msg.channel === 6;
+
+      if (isShiftedBrowseKnob) {
+        // SHIFT + Browse knob = fast scroll (10x speed)
+        console.log(`⚡ SHIFT + BROWSE (10x scroll): value=${msg.value}`);
       }
 
       const event: ControllerEvent = {

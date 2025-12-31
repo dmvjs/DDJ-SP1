@@ -9,14 +9,16 @@ import { AudioPlayer } from './js/AudioPlayer.js';
 const ws = new WebSocketClient();
 const state = new ControllerState();
 const ui = new UIRenderer();
-const songList = new SongList('song-list');
 const activeTracks = new ActiveTracks('active-tracks');
+const songList = new SongList('song-list', activeTracks);
 const audioPlayer = new AudioPlayer();
 
 // Track volume levels for each deck (0-127 MIDI range)
 const deckVolumes = new Map([
-  [0, 127], // Deck A (left) - full volume by default
-  [1, 127]  // Deck B (right) - full volume by default
+  [0, 127], // Deck 1 - full volume by default
+  [1, 127], // Deck 2 - full volume by default
+  [2, 127], // Deck 3 - full volume by default
+  [3, 127]  // Deck 4 - full volume by default
 ]);
 
 // Connect to server
@@ -88,8 +90,8 @@ function initializeLayout(layout) {
 function handleEvent(event) {
   const key = `${event.type}-${event.type === 'button' ? event.button : event.knob}-ch${event.channel}`;
 
-  // Debug logging for LOAD buttons
-  if (event.type === 'button' && (event.button === 70 || event.button === 71) && event.channel === 6) {
+  // Debug logging for LOAD buttons (notes 70, 71, 72, 73)
+  if (event.type === 'button' && (event.button === 70 || event.button === 71 || event.button === 72 || event.button === 73) && event.channel === 6) {
     console.log(`🎯 LOAD button event received: button=${event.button}, channel=${event.channel}, pressed=${event.pressed}, key=${key}`);
     console.log(`   hasControl('${key}'):`, state.hasControl(key));
   }
@@ -125,7 +127,9 @@ function handleButtonEvent(control, event) {
   const isLocked = state.isButtonLocked(lockKey);
 
   // Debug logging for LOAD buttons
-  if (control.id === 'button-70-ch6' || control.id === 'button-71-ch6') {
+  const isLoadButton = control.id === 'button-70-ch6' || control.id === 'button-71-ch6' ||
+                        control.id === 'button-72-ch6' || control.id === 'button-73-ch6';
+  if (isLoadButton) {
     console.log(`🔘 LOAD button event: ${control.id}, pressed=${event.pressed}, channel=${event.channel}, button=${event.button}`);
   }
 
@@ -134,22 +138,28 @@ function handleButtonEvent(control, event) {
 
   // Handle DECK button state changes - update mode buttons to show new deck's mode
   if (control.id === 'button-114-ch2' || control.id === 'button-114-ch3') {
+    console.log(`🎚️ DECK button event: ${control.id}, pressed=${event.pressed}`);
+    console.log(`   State after update:`, state.deckButtonStates);
     updateModeButtons();
   }
 
   // Handle LOAD buttons (only on button press, not release)
-  if (event.pressed && (control.id === 'button-70-ch6' || control.id === 'button-71-ch6')) {
+  if (event.pressed && isLoadButton) {
     console.log(`✅ Calling handleLoadButton for ${control.id}`);
     handleLoadButton(control.id);
   }
 
   // Handle SLIP buttons - fade out that deck (only on button press)
-  if (event.pressed && (control.id === 'button-64-ch0' || control.id === 'button-64-ch1')) {
+  // Support all 4 deck channels (0, 1, 2, 3)
+  if (event.pressed && (control.id === 'button-64-ch0' || control.id === 'button-64-ch1' ||
+                         control.id === 'button-64-ch2' || control.id === 'button-64-ch3')) {
     handleSlipButton(control.id);
   }
 
   // Handle CENSOR buttons - reverse playback
-  if (control.id === 'button-21-ch0' || control.id === 'button-21-ch1') {
+  // Support all 4 deck channels (0, 1, 2, 3)
+  if (control.id === 'button-21-ch0' || control.id === 'button-21-ch1' ||
+      control.id === 'button-21-ch2' || control.id === 'button-21-ch3') {
     if (event.pressed) {
       handleCensorPress(control.id);
     } else {
@@ -158,7 +168,9 @@ function handleButtonEvent(control, event) {
   }
 
   // Handle SYNC buttons - sync deck playback positions (only on button press)
-  if (event.pressed && (control.id === 'button-88-ch0' || control.id === 'button-88-ch1')) {
+  // Support all 4 deck channels (0, 1, 2, 3)
+  if (event.pressed && (control.id === 'button-88-ch0' || control.id === 'button-88-ch1' ||
+                         control.id === 'button-88-ch2' || control.id === 'button-88-ch3')) {
     handleSyncButton(control.id);
   }
 }
@@ -176,18 +188,36 @@ function handleLoadButton(buttonId) {
 
   let targetDeck;
 
-  if (buttonId === 'button-70-ch6') {
-    // LOAD A: deck 1 or 3 (if DECK 1/3 button active)
+  console.log(`🔍 handleLoadButton: buttonId=${buttonId}`);
+  console.log(`   DECK button states:`, state.deckButtonStates);
+  console.log(`   DECK 1/3 (ch2, note 114):`, state.isDeckButtonActive(2));
+  console.log(`   DECK 2/4 (ch3, note 114):`, state.isDeckButtonActive(3));
+
+  // Based on actual hardware testing:
+  // Note 72: LEFT LOAD button - loads to Deck 1 or 3 based on DECK 1/3 button
+  // Note 71: RIGHT LOAD button - loads to Deck 2 or 4 based on DECK 2/4 button
+  // Note 70, 73: Additional buttons (unknown function, using same logic)
+
+  if (buttonId === 'button-72-ch6') {
+    // Button 72: LEFT LOAD button (Deck 1 or 3 based on DECK 1/3 button state)
     const deck3Active = state.isDeckButtonActive(2);
     targetDeck = deck3Active ? 3 : 1;
-    console.log(`🔍 LOAD A: DECK 1/3 button state=${deck3Active}, targetDeck=${targetDeck}`);
-    console.log(`   All deck states:`, state.deckButtonStates);
+    console.log(`   → Button 72 (LOAD LEFT): DECK 1/3=${deck3Active}, targetDeck=${targetDeck}`);
   } else if (buttonId === 'button-71-ch6') {
-    // LOAD B: deck 2 or 4 (if DECK 2/4 button active)
+    // Button 71: RIGHT LOAD button (Deck 2 or 4 based on DECK 2/4 button state)
     const deck4Active = state.isDeckButtonActive(3);
     targetDeck = deck4Active ? 4 : 2;
-    console.log(`🔍 LOAD B: DECK 2/4 button state=${deck4Active}, targetDeck=${targetDeck}`);
-    console.log(`   All deck states:`, state.deckButtonStates);
+    console.log(`   → Button 71 (LOAD RIGHT): DECK 2/4=${deck4Active}, targetDeck=${targetDeck}`);
+  } else if (buttonId === 'button-70-ch6') {
+    // Button 70: Try LEFT side logic
+    const deck3Active = state.isDeckButtonActive(2);
+    targetDeck = deck3Active ? 3 : 1;
+    console.log(`   → Button 70 (ALT LEFT): DECK 1/3=${deck3Active}, targetDeck=${targetDeck}`);
+  } else if (buttonId === 'button-73-ch6') {
+    // Button 73: Try RIGHT side logic
+    const deck4Active = state.isDeckButtonActive(3);
+    targetDeck = deck4Active ? 4 : 2;
+    console.log(`   → Button 73 (ALT RIGHT): DECK 2/4=${deck4Active}, targetDeck=${targetDeck}`);
   }
 
   if (targetDeck) {
@@ -210,19 +240,19 @@ function handleLoadButton(buttonId) {
 
 /**
  * Handle SLIP button press to fade out that deck
+ * Supports all 4 deck channels (0-3)
  */
 function handleSlipButton(buttonId) {
   let targetDeck;
 
-  if (buttonId === 'button-64-ch0') {
-    // SLIP A (left): deck 1 or 3 based on DECK 1/3 button
-    const deck3Active = state.isDeckButtonActive(2);
-    targetDeck = deck3Active ? 3 : 1;
-  } else if (buttonId === 'button-64-ch1') {
-    // SLIP B (right): deck 2 or 4 based on DECK 2/4 button
-    const deck4Active = state.isDeckButtonActive(3);
-    targetDeck = deck4Active ? 4 : 2;
-  }
+  // Extract channel from button ID (button-64-ch0 -> channel 0)
+  const match = buttonId.match(/ch(\d+)/);
+  if (!match) return;
+
+  const channel = parseInt(match[1]);
+
+  // Map channel directly to deck (channel 0=deck 1, 1=deck 2, 2=deck 3, 3=deck 4)
+  targetDeck = channel + 1;
 
   if (targetDeck) {
     const audioDeck = targetDeck - 1; // Convert deck 1-4 to audio deck 0-3
@@ -233,131 +263,97 @@ function handleSlipButton(buttonId) {
 
 /**
  * Handle CENSOR button press - start reverse playback
+ * Supports all 4 deck channels (0-3)
  */
 function handleCensorPress(buttonId) {
-  let targetDeck;
+  // Extract channel from button ID (button-21-ch0 -> channel 0)
+  const match = buttonId.match(/ch(\d+)/);
+  if (!match) return;
 
-  if (buttonId === 'button-21-ch0') {
-    // CENSOR A (left): deck 1 or 3 based on DECK 1/3 button
-    const deck3Active = state.isDeckButtonActive(2);
-    targetDeck = deck3Active ? 3 : 1;
-  } else if (buttonId === 'button-21-ch1') {
-    // CENSOR B (right): deck 2 or 4 based on DECK 2/4 button
-    const deck4Active = state.isDeckButtonActive(3);
-    targetDeck = deck4Active ? 4 : 2;
-  }
+  const channel = parseInt(match[1]);
 
-  if (targetDeck) {
-    const audioDeck = targetDeck - 1; // Convert deck 1-4 to audio deck 0-3
-    audioPlayer.startReverse(audioDeck);
-    console.log(`⏪ CENSOR pressed: Starting reverse on Deck ${targetDeck}`);
-  }
+  // Map channel directly to deck (channel 0=deck 1, 1=deck 2, 2=deck 3, 3=deck 4)
+  const targetDeck = channel + 1;
+
+  const audioDeck = targetDeck - 1; // Convert deck 1-4 to audio deck 0-3
+  audioPlayer.startReverse(audioDeck);
+  console.log(`⏪ CENSOR pressed: Starting reverse on Deck ${targetDeck}`);
 }
 
 /**
  * Handle CENSOR button release - stop reverse and resume normal playback
+ * Supports all 4 deck channels (0-3)
  */
 function handleCensorRelease(buttonId) {
-  let targetDeck;
+  // Extract channel from button ID (button-21-ch0 -> channel 0)
+  const match = buttonId.match(/ch(\d+)/);
+  if (!match) return;
 
-  if (buttonId === 'button-21-ch0') {
-    // CENSOR A (left): deck 1 or 3 based on DECK 1/3 button
-    const deck3Active = state.isDeckButtonActive(2);
-    targetDeck = deck3Active ? 3 : 1;
-  } else if (buttonId === 'button-21-ch1') {
-    // CENSOR B (right): deck 2 or 4 based on DECK 2/4 button
-    const deck4Active = state.isDeckButtonActive(3);
-    targetDeck = deck4Active ? 4 : 2;
-  }
+  const channel = parseInt(match[1]);
 
-  if (targetDeck) {
-    const audioDeck = targetDeck - 1; // Convert deck 1-4 to audio deck 0-3
-    audioPlayer.stopReverse(audioDeck);
-    console.log(`⏪ CENSOR released: Resuming normal playback on Deck ${targetDeck}`);
-  }
+  // Map channel directly to deck (channel 0=deck 1, 1=deck 2, 2=deck 3, 3=deck 4)
+  const targetDeck = channel + 1;
+
+  const audioDeck = targetDeck - 1; // Convert deck 1-4 to audio deck 0-3
+  audioPlayer.stopReverse(audioDeck);
+  console.log(`⏪ CENSOR released: Resuming normal playback on Deck ${targetDeck}`);
 }
 
 /**
- * Handle SYNC button press - sync one deck's playback to the other
+ * Handle SYNC button press - sync ALL other decks to the pressed deck
+ * Supports all 4 deck channels (0-3)
  */
 function handleSyncButton(buttonId) {
   console.log(`🔗 SYNC button pressed: ${buttonId}`);
 
-  if (buttonId === 'button-88-ch0') {
-    // SYNC A (left): sync right deck to left deck's position
-    const deck3Active = state.isDeckButtonActive(2);
-    const deck4Active = state.isDeckButtonActive(3);
-    const leftDeck = deck3Active ? 3 : 1;
-    const rightDeck = deck4Active ? 4 : 2;
+  // Extract channel from button ID (button-88-ch0 -> channel 0)
+  const match = buttonId.match(/ch(\d+)/);
+  if (!match) return;
 
-    console.log(`🔗 SYNC LEFT: leftDeck=${leftDeck}, rightDeck=${rightDeck}`);
+  const channel = parseInt(match[1]);
 
-    // Get the loaded song for the right deck
-    const rightSong = activeTracks.getTrack(rightDeck);
-    if (!rightSong) {
-      console.log(`⚠️  No song loaded on Deck ${rightDeck}`);
-      return;
+  // Map channel directly to deck (channel 0=deck 1, 1=deck 2, 2=deck 3, 3=deck 4)
+  const sourceDeck = channel + 1;
+
+  console.log(`🔗 Syncing ALL other decks to Deck ${sourceDeck}`);
+
+  const sourceAudioDeck = sourceDeck - 1;
+
+  // Get current state of source deck
+  const sourceState = audioPlayer.getCurrentPlaybackState(sourceAudioDeck);
+  if (!sourceState) {
+    console.log(`⚠️  Deck ${sourceDeck} is not playing`);
+    return;
+  }
+
+  console.log(`🔗 Source: Deck ${sourceDeck} at ${sourceState.section} ${sourceState.position.toFixed(2)}s`);
+
+  // Sync all other decks (1-4) to this source deck
+  for (let targetDeck = 1; targetDeck <= 4; targetDeck++) {
+    if (targetDeck === sourceDeck) {
+      continue; // Skip the source deck itself
     }
 
-    const leftAudioDeck = leftDeck - 1;
-    const rightAudioDeck = rightDeck - 1;
-
-    // Get current state of left deck
-    const leftState = audioPlayer.getCurrentPlaybackState(leftAudioDeck);
-    if (!leftState) {
-      console.log(`⚠️  Deck ${leftDeck} is not playing`);
-      return;
-    }
-
-    // Check tempo match
-    if (leftState.song.bpm !== rightSong.bpm) {
-      console.log(`⚠️  Tempo mismatch: Deck ${leftDeck} (${leftState.song.bpm} BPM) vs Deck ${rightDeck} (${rightSong.bpm} BPM)`);
-      return;
-    }
-
-    // Sync right deck to left deck's position
-    const beatsPerSecond = rightSong.bpm / 60;
-    const positionInBeats = leftState.position * beatsPerSecond;
-    console.log(`🔗 Syncing Deck ${rightDeck} to Deck ${leftDeck}: ${leftState.section} at ${positionInBeats.toFixed(2)} beats`);
-    audioPlayer.play(rightSong, rightAudioDeck, leftState.section, positionInBeats);
-
-  } else if (buttonId === 'button-88-ch1') {
-    // SYNC B (right): sync left deck to right deck's position
-    const deck3Active = state.isDeckButtonActive(2);
-    const deck4Active = state.isDeckButtonActive(3);
-    const leftDeck = deck3Active ? 3 : 1;
-    const rightDeck = deck4Active ? 4 : 2;
-
-    console.log(`🔗 SYNC RIGHT: leftDeck=${leftDeck}, rightDeck=${rightDeck}`);
-
-    // Get the loaded song for the left deck
-    const leftSong = activeTracks.getTrack(leftDeck);
-    if (!leftSong) {
-      console.log(`⚠️  No song loaded on Deck ${leftDeck}`);
-      return;
-    }
-
-    const leftAudioDeck = leftDeck - 1;
-    const rightAudioDeck = rightDeck - 1;
-
-    // Get current state of right deck
-    const rightState = audioPlayer.getCurrentPlaybackState(rightAudioDeck);
-    if (!rightState) {
-      console.log(`⚠️  Deck ${rightDeck} is not playing`);
-      return;
+    // Get the loaded song for the target deck
+    const targetSong = activeTracks.getTrack(targetDeck);
+    if (!targetSong) {
+      console.log(`   ⏭️  Deck ${targetDeck}: No song loaded, skipping`);
+      continue;
     }
 
     // Check tempo match
-    if (rightState.song.bpm !== leftSong.bpm) {
-      console.log(`⚠️  Tempo mismatch: Deck ${rightDeck} (${rightState.song.bpm} BPM) vs Deck ${leftDeck} (${leftSong.bpm} BPM)`);
-      return;
+    if (sourceState.song.bpm !== targetSong.bpm) {
+      console.log(`   ⚠️  Deck ${targetDeck}: Tempo mismatch (${targetSong.bpm} BPM vs ${sourceState.song.bpm} BPM), skipping`);
+      continue;
     }
 
-    // Sync left deck to right deck's position
-    const beatsPerSecond = leftSong.bpm / 60;
-    const positionInBeats = rightState.position * beatsPerSecond;
-    console.log(`🔗 Syncing Deck ${leftDeck} to Deck ${rightDeck}: ${rightState.section} at ${positionInBeats.toFixed(2)} beats`);
-    audioPlayer.play(leftSong, leftAudioDeck, rightState.section, positionInBeats);
+    // Sync target deck to source deck's position
+    const targetAudioDeck = targetDeck - 1;
+    const beatsPerSecond = targetSong.bpm / 60;
+    const positionInBeats = sourceState.position * beatsPerSecond;
+
+    console.log(`   ✅ Deck ${targetDeck}: Syncing to ${sourceState.section} at ${positionInBeats.toFixed(2)} beats`);
+    audioPlayer.play(targetSong, targetAudioDeck, sourceState.section, positionInBeats);
   }
 }
 
@@ -367,7 +363,12 @@ function handleSyncButton(buttonId) {
 function handleKnobEvent(control, event, key) {
   // Check if this is the center browser knob (controls song list scrolling)
   if (control.id === 'knob-64-ch6') {
-    songList.scroll(event.value);
+    songList.scroll(event.value, 1); // Normal speed
+  }
+
+  // Check if this is SHIFT + browser knob (10x fast scroll)
+  if (control.id === 'knob-100-ch6') {
+    songList.scroll(event.value, 10); // 10x speed
   }
 
   // Check if this is the sampler volume slider (controls master volume)
@@ -376,11 +377,17 @@ function handleKnobEvent(control, event, key) {
   }
 
   // Check if this is a volume knob (infinite encoder, fast scrolling)
-  if (control.id === 'knob-23-ch0' || control.id === 'knob-23-ch1') {
-    const deckIndex = control.id === 'knob-23-ch0' ? 0 : 1; // 0 = left, 1 = right
+  // Support all 4 deck channels: ch0, ch1, ch2, ch3
+  if (control.id === 'knob-23-ch0' || control.id === 'knob-23-ch1' ||
+      control.id === 'knob-23-ch2' || control.id === 'knob-23-ch3') {
+    // Extract channel from control ID to determine deck
+    const match = control.id.match(/ch(\d+)/);
+    if (!match) return;
 
-    // Get current volume
-    let currentVolume = deckVolumes.get(deckIndex);
+    const targetDeck = parseInt(match[1]); // channel 0=deck 0, 1=deck 1, 2=deck 2, 3=deck 3 (audio deck index)
+
+    // Get current volume for this deck
+    let currentVolume = deckVolumes.get(targetDeck);
 
     // Calculate delta from center (64)
     // Negate for correct direction, use 0.3x multiplier for fine control
@@ -388,21 +395,11 @@ function handleKnobEvent(control, event, key) {
 
     // Update volume with clamping (0-127)
     currentVolume = Math.max(0, Math.min(127, currentVolume + delta));
-    deckVolumes.set(deckIndex, currentVolume);
+    deckVolumes.set(targetDeck, currentVolume);
 
-    // Determine which decks to control based on DECK button state
-    const deck3Active = state.isDeckButtonActive(2);
-    const deck4Active = state.isDeckButtonActive(3);
-
-    if (deckIndex === 0) {
-      // Left volume knob: controls deck 1 or 3
-      const targetDeck = deck3Active ? 2 : 0; // Audio deck 0-3
-      audioPlayer.setVolume(targetDeck, currentVolume);
-    } else {
-      // Right volume knob: controls deck 2 or 4
-      const targetDeck = deck4Active ? 3 : 1; // Audio deck 0-3
-      audioPlayer.setVolume(targetDeck, currentVolume);
-    }
+    // Set volume for the target deck
+    audioPlayer.setVolume(targetDeck, currentVolume);
+    console.log(`🔊 Volume: Deck ${targetDeck + 1} = ${currentVolume}`);
 
     // Update the UI with raw value for correct rotation, but display as percentage
     state.updateKnob(control.id, currentVolume);
@@ -446,22 +443,15 @@ function handleLockChange(lockData) {
 }
 
 /**
- * Handle tempo changes
+ * Handle tempo changes (now controlled by SHIFT + volume knob)
  */
 function handleTempoChange(tempoData) {
   state.setTempo(tempoData.tempo);
 
-  // Update both BEATS knobs to show new tempo
-  const beatsKnobs = ['knob-0-ch4', 'knob-0-ch5'];
-  beatsKnobs.forEach(knobId => {
-    if (state.hasControl(knobId)) {
-      const control = state.getControl(knobId);
-      ui.updateKnob(control.element, knobId, control.value || 64, state);
-    }
-  });
-
   // Update song list with filtered songs for new tempo
   songList.setTempo(tempoData.tempo);
+
+  console.log(`🎵 Tempo changed to ${tempoData.tempo} BPM via SHIFT + Volume`);
 }
 
 /**
@@ -500,16 +490,16 @@ function handleModeChange(modeData) {
  */
 function updateModeButtons() {
   // Update left mode buttons (Deck 1 or 3 based on DECK 1/3 button)
-  updateDeckModeButtons(0, 'deck-a-buttons');
+  updateDeckModeButtons(0);
   // Update right mode buttons (Deck 2 or 4 based on DECK 2/4 button)
-  updateDeckModeButtons(1, 'deck-b-buttons');
+  updateDeckModeButtons(1);
 }
 
 /**
  * Update mode buttons for a specific channel
  * Shows the mode for the currently active deck (1-4)
  */
-function updateDeckModeButtons(channel, sectionId) {
+function updateDeckModeButtons(channel) {
   const activeMode = state.getActiveModeForChannel(channel);
   const modeButtons = [27, 30, 32, 34]; // HOT CUE, ROLL, SLICER, SAMPLER
 
@@ -547,49 +537,14 @@ function handleSpindown(spindownData) {
 }
 
 /**
- * Handle sync state change - sync deck playback when SYNC is pressed
+ * Handle sync state change - sync ALL other decks to the pressed deck
  */
 function handleSyncChange(syncData) {
-  const { deck, synced } = syncData;
-  console.log(`🔗 SYNC pressed: Deck ${deck}, synced=${synced}`);
+  const { deck } = syncData;
+  console.log(`🔗 SYNC pressed: Deck ${deck} - syncing ALL other decks to this deck`);
 
-  // Sync immediately on every SYNC button press (ignore toggle state)
-  // if (!synced) {
-  //   return;
-  // }
-
-  // Determine left and right decks based on deck button states
-  const deck3Active = state.isDeckButtonActive(2);
-  const deck4Active = state.isDeckButtonActive(3);
-  const leftDeck = deck3Active ? 3 : 1;
-  const rightDeck = deck4Active ? 4 : 2;
-
-  let sourceDeck, targetDeck;
-
-  // If left deck (1 or 3) pressed SYNC, sync right deck to left
-  if (deck === leftDeck) {
-    sourceDeck = leftDeck;
-    targetDeck = rightDeck;
-    console.log(`🔗 SYNC LEFT: Syncing Deck ${targetDeck} to Deck ${sourceDeck}`);
-  }
-  // If right deck (2 or 4) pressed SYNC, sync left deck to right
-  else if (deck === rightDeck) {
-    sourceDeck = rightDeck;
-    targetDeck = leftDeck;
-    console.log(`🔗 SYNC RIGHT: Syncing Deck ${targetDeck} to Deck ${sourceDeck}`);
-  } else {
-    return;
-  }
-
-  // Get the loaded songs for both decks
-  const targetSong = activeTracks.getTrack(targetDeck);
-  if (!targetSong) {
-    console.log(`⚠️  No song loaded on Deck ${targetDeck}`);
-    return;
-  }
-
+  const sourceDeck = deck;
   const sourceAudioDeck = sourceDeck - 1;
-  const targetAudioDeck = targetDeck - 1;
 
   // Get current state of source deck
   const sourceState = audioPlayer.getCurrentPlaybackState(sourceAudioDeck);
@@ -598,17 +553,35 @@ function handleSyncChange(syncData) {
     return;
   }
 
-  // Check tempo match
-  if (sourceState.song.bpm !== targetSong.bpm) {
-    console.log(`⚠️  Tempo mismatch: Deck ${sourceDeck} (${sourceState.song.bpm} BPM) vs Deck ${targetDeck} (${targetSong.bpm} BPM)`);
-    return;
-  }
+  console.log(`🔗 Source: Deck ${sourceDeck} at ${sourceState.section} ${sourceState.position.toFixed(2)}s`);
 
-  // Sync target deck to source deck's position
-  const beatsPerSecond = targetSong.bpm / 60;
-  const positionInBeats = sourceState.position * beatsPerSecond;
-  console.log(`🔗 Syncing: ${sourceState.section} at ${positionInBeats.toFixed(2)} beats`);
-  audioPlayer.play(targetSong, targetAudioDeck, sourceState.section, positionInBeats);
+  // Sync all other decks (1-4) to this source deck
+  for (let targetDeck = 1; targetDeck <= 4; targetDeck++) {
+    if (targetDeck === sourceDeck) {
+      continue; // Skip the source deck itself
+    }
+
+    // Get the loaded song for the target deck
+    const targetSong = activeTracks.getTrack(targetDeck);
+    if (!targetSong) {
+      console.log(`   ⏭️  Deck ${targetDeck}: No song loaded, skipping`);
+      continue;
+    }
+
+    // Check tempo match
+    if (sourceState.song.bpm !== targetSong.bpm) {
+      console.log(`   ⚠️  Deck ${targetDeck}: Tempo mismatch (${targetSong.bpm} BPM vs ${sourceState.song.bpm} BPM), skipping`);
+      continue;
+    }
+
+    // Sync target deck to source deck's position
+    const targetAudioDeck = targetDeck - 1;
+    const beatsPerSecond = targetSong.bpm / 60;
+    const positionInBeats = sourceState.position * beatsPerSecond;
+
+    console.log(`   ✅ Deck ${targetDeck}: Syncing to ${sourceState.section} at ${positionInBeats.toFixed(2)} beats`);
+    audioPlayer.play(targetSong, targetAudioDeck, sourceState.section, positionInBeats);
+  }
 }
 
 /**
@@ -619,6 +592,8 @@ function handleSyncChange(syncData) {
 function handlePadPress(padData) {
   const { channel, note, deck } = padData;
 
+  console.log(`🎹 handlePadPress: channel=${channel}, note=${note}, deck=${deck}`);
+
   // Update UI to turn on the pad LED
   const padButtonId = `button-${note}-ch${channel}`;
   if (state.hasControl(padButtonId)) {
@@ -627,22 +602,10 @@ function handlePadPress(padData) {
     ui.updateButton(control.element, true, false, false, false);
   }
 
-  // Determine which deck to control based on pad channel and DECK button state
-  // channel 7 = left pads (Deck A) → controls Deck 1 or 3
-  // channel 8 = right pads (Deck B) → controls Deck 2 or 4
-  let targetDeck;
-  if (channel === 7) {
-    // Left pads
-    const deck3Active = state.isDeckButtonActive(2);
-    targetDeck = deck3Active ? 3 : 1;
-  } else if (channel === 8) {
-    // Right pads
-    const deck4Active = state.isDeckButtonActive(3);
-    targetDeck = deck4Active ? 4 : 2;
-  } else {
-    console.log(`⚠️ Unknown pad channel: ${channel}`);
-    return;
-  }
+  // Use the deck value sent from backend (already calculated based on DECK button state)
+  // Backend correctly determines: channel 7 → Deck 1 or 3, channel 8 → Deck 2 or 4
+  const targetDeck = deck;
+  console.log(`🎯 Target deck: ${targetDeck} (from backend)`);
 
   // Get the loaded track for this deck
   const loadedSong = activeTracks.getTrack(targetDeck);
@@ -652,8 +615,9 @@ function handlePadPress(padData) {
   }
 
   // Check active mode for this deck
-  const activeMode = state.getActiveModeForChannel(channel === 7 ? 0 : 1);
-  console.log(`🎮 Active mode for channel ${channel === 7 ? 0 : 1}: ${activeMode} (${getModeName(activeMode)})`);
+  // Use getActiveMode directly with the deck number (1-4)
+  const activeMode = state.getActiveMode(targetDeck);
+  console.log(`🎮 Active mode for Deck ${targetDeck}: ${activeMode} (${getModeName(activeMode)})`);
 
   // ROLL MODE (30): Loop small sections based on pad
   if (activeMode === 30) {
@@ -717,7 +681,7 @@ function handlePadPress(padData) {
  * Stops roll effect when pad is released in ROLL mode
  */
 function handlePadRelease(padData) {
-  const { channel, note, deck } = padData;
+  const { channel, note } = padData;
 
   // Update UI to turn off the pad LED
   const padButtonId = `button-${note}-ch${channel}`;

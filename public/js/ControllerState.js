@@ -219,6 +219,6 @@ export class ControllerState {
     this.controls.clear();
     this.lockedButtons.clear();
     this.currentTempo = 94;
-    this.padModes = new Map([[0, 27], [1, 27]]);
+    this.padModes = new Map([[1, 27], [2, 27], [3, 27], [4, 27]]); // Reset all 4 decks to HOT CUE
   }
 }

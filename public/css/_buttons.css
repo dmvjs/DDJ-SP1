@@ -696,6 +696,26 @@
   display: none;
 }
 
+/* Hide deck 3 and 4 buttons (channels 2 and 3) - they're only for MIDI detection */
+#button-88-ch2,
+#button-64-ch2,
+#button-21-ch2,
+#knob-23-ch2,
+#button-27-ch2,
+#button-30-ch2,
+#button-32-ch2,
+#button-34-ch2,
+#button-88-ch3,
+#button-64-ch3,
+#button-21-ch3,
+#knob-23-ch3,
+#button-27-ch3,
+#button-30-ch3,
+#button-32-ch3,
+#button-34-ch3 {
+  display: none !important;
+}
+
 /* Shift labels below pad mode buttons */
 #button-27-ch0::after,
 #button-30-ch0::after,
@@ -905,7 +925,7 @@
   grid-column: span 2;
 }
 
-/* Pad mode buttons - Row 3 */
+/* Pad mode buttons - Row 3 (on deck control channels 0 & 1) */
 #button-27-ch0,
 #button-30-ch0,
 #button-32-ch0,

@@ -9,10 +9,10 @@
  * - 1 sampler volume slider
  *
  * Channel Mapping:
- * - Ch 0/1: Deck A/B control buttons
+ * - Ch 0/1/2/3: Deck 1/2/3/4 control buttons (SYNC, SLIP, CENSOR, VOLUME)
  * - Ch 4/5: Deck A/B FX controls
  * - Ch 6: Center section
- * - Ch 7/8: Deck A/B performance pads
+ * - Ch 7/8/9/10: Deck 1/2/3/4 performance pads
  */
 export const DDJ_SP1_LAYOUT = [
     // Deck A (Left) - Performance Pads
@@ -33,6 +33,8 @@ export const DDJ_SP1_LAYOUT = [
         label: '',
         section: 'deck-b'
     })),
+    // Note: Channels 9 and 10 (Deck 3/4 pads) use the same physical pads as channels 7/8
+    // The backend handles routing these events to the correct deck, no duplicate UI elements needed
     // Deck A - Top Row Dials (Channel 4)
     { id: 'knob-2-ch4', type: 'knob', channel: 4, number: 2, label: '1', section: 'deck-a-top' },
     { id: 'knob-4-ch4', type: 'knob', channel: 4, number: 4, label: '2', section: 'deck-a-top' },
@@ -50,14 +52,14 @@ export const DDJ_SP1_LAYOUT = [
     { id: 'button-72-ch4', type: 'button', channel: 4, number: 72, label: 'FX 2', section: 'deck-a-buttons' },
     { id: 'button-73-ch4', type: 'button', channel: 4, number: 73, label: 'FX 3', section: 'deck-a-buttons' },
     { id: 'button-74-ch4', type: 'button', channel: 4, number: 74, label: 'FX ASSIGN', section: 'deck-a-buttons' },
-    // Deck A - Middle Button Row
+    // Deck A - Middle Button Row (Deck 1 = Channel 0 in 0-indexed, Channel 1 in spec)
     { id: 'button-88-ch0', type: 'button', channel: 0, number: 88, label: 'SYNC', section: 'deck-a-buttons' },
     { id: 'button-64-ch0', type: 'button', channel: 0, number: 64, label: 'STOP', section: 'deck-a-buttons' },
     { id: 'button-21-ch0', type: 'button', channel: 0, number: 21, label: 'CENSOR', section: 'deck-a-buttons' },
     { id: 'button-param-left-ch0', type: 'button', channel: 0, number: 200, label: 'PARAM.1', section: 'deck-a-buttons' },
     { id: 'button-param-right-ch0', type: 'button', channel: 0, number: 201, label: 'PARAM.1', section: 'deck-a-buttons' },
     { id: 'knob-23-ch0', type: 'knob', channel: 0, number: 23, label: 'VOLUME', section: 'deck-a-buttons' },
-    // Deck A - Bottom Button Row (Pad Modes)
+    // Deck A - Bottom Button Row (Pad Modes) - Mode buttons are on deck control channel 0, NOT pad channel 7
     { id: 'button-27-ch0', type: 'button', channel: 0, number: 27, label: 'HOT CUE', section: 'deck-a-buttons' },
     { id: 'button-30-ch0', type: 'button', channel: 0, number: 30, label: 'ROLL', section: 'deck-a-buttons' },
     { id: 'button-32-ch0', type: 'button', channel: 0, number: 32, label: 'SLICER', section: 'deck-a-buttons' },
@@ -67,38 +69,58 @@ export const DDJ_SP1_LAYOUT = [
     { id: 'button-72-ch5', type: 'button', channel: 5, number: 72, label: 'FX 2', section: 'deck-b-buttons' },
     { id: 'button-73-ch5', type: 'button', channel: 5, number: 73, label: 'FX 3', section: 'deck-b-buttons' },
     { id: 'button-74-ch5', type: 'button', channel: 5, number: 74, label: 'FX ASSIGN', section: 'deck-b-buttons' },
-    // Deck B - Middle Button Row
+    // Deck B - Middle Button Row (Deck 2 = Channel 1 in 0-indexed, Channel 2 in spec)
     { id: 'button-88-ch1', type: 'button', channel: 1, number: 88, label: 'SYNC', section: 'deck-b-buttons' },
     { id: 'button-64-ch1', type: 'button', channel: 1, number: 64, label: 'STOP', section: 'deck-b-buttons' },
     { id: 'button-21-ch1', type: 'button', channel: 1, number: 21, label: 'CENSOR', section: 'deck-b-buttons' },
     { id: 'button-param-left-ch1', type: 'button', channel: 1, number: 200, label: 'PARAM.1', section: 'deck-b-buttons' },
     { id: 'button-param-right-ch1', type: 'button', channel: 1, number: 201, label: 'PARAM.1', section: 'deck-b-buttons' },
     { id: 'knob-23-ch1', type: 'knob', channel: 1, number: 23, label: 'VOLUME', section: 'deck-b-buttons' },
-    // Deck B - Bottom Button Row (Pad Modes)
+    // Deck B - Bottom Button Row (Pad Modes) - Mode buttons are on deck control channel 1, NOT pad channel 8
     { id: 'button-27-ch1', type: 'button', channel: 1, number: 27, label: 'HOT CUE', section: 'deck-b-buttons' },
     { id: 'button-30-ch1', type: 'button', channel: 1, number: 30, label: 'ROLL', section: 'deck-b-buttons' },
     { id: 'button-32-ch1', type: 'button', channel: 1, number: 32, label: 'SLICER', section: 'deck-b-buttons' },
     { id: 'button-34-ch1', type: 'button', channel: 1, number: 34, label: 'SAMPLER', section: 'deck-b-buttons' },
-    // Center Controls
-    // Row 1 - Deck selection buttons (4 buttons labeled "3" and "4" with DECK above)
-    { id: 'button-76-ch6', type: 'button', channel: 6, number: 76, label: '3', section: 'center-row-4' },
-    { id: 'button-80-ch6', type: 'button', channel: 6, number: 80, label: '3', section: 'center-row-4' },
-    { id: 'button-77-ch6', type: 'button', channel: 6, number: 77, label: '4', section: 'center-row-4' },
-    { id: 'button-81-ch6', type: 'button', channel: 6, number: 81, label: '4', section: 'center-row-4' },
+    // Deck 3 - Control Buttons (Channel 2) - not displayed in UI, only for MIDI detection
+    { id: 'button-88-ch2', type: 'button', channel: 2, number: 88, label: 'SYNC', section: 'deck-a-buttons' },
+    { id: 'button-64-ch2', type: 'button', channel: 2, number: 64, label: 'STOP', section: 'deck-a-buttons' },
+    { id: 'button-21-ch2', type: 'button', channel: 2, number: 21, label: 'CENSOR', section: 'deck-a-buttons' },
+    { id: 'knob-23-ch2', type: 'knob', channel: 2, number: 23, label: 'VOLUME', section: 'deck-a-buttons' },
+    { id: 'button-27-ch2', type: 'button', channel: 2, number: 27, label: 'HOT CUE', section: 'deck-a-buttons' },
+    { id: 'button-30-ch2', type: 'button', channel: 2, number: 30, label: 'ROLL', section: 'deck-a-buttons' },
+    { id: 'button-32-ch2', type: 'button', channel: 2, number: 32, label: 'SLICER', section: 'deck-a-buttons' },
+    { id: 'button-34-ch2', type: 'button', channel: 2, number: 34, label: 'SAMPLER', section: 'deck-a-buttons' },
+    // Deck 4 - Control Buttons (Channel 3) - not displayed in UI, only for MIDI detection
+    { id: 'button-88-ch3', type: 'button', channel: 3, number: 88, label: 'SYNC', section: 'deck-b-buttons' },
+    { id: 'button-64-ch3', type: 'button', channel: 3, number: 64, label: 'STOP', section: 'deck-b-buttons' },
+    { id: 'button-21-ch3', type: 'button', channel: 3, number: 21, label: 'CENSOR', section: 'deck-b-buttons' },
+    { id: 'knob-23-ch3', type: 'knob', channel: 3, number: 23, label: 'VOLUME', section: 'deck-b-buttons' },
+    { id: 'button-27-ch3', type: 'button', channel: 3, number: 27, label: 'HOT CUE', section: 'deck-b-buttons' },
+    { id: 'button-30-ch3', type: 'button', channel: 3, number: 30, label: 'ROLL', section: 'deck-b-buttons' },
+    { id: 'button-32-ch3', type: 'button', channel: 3, number: 32, label: 'SLICER', section: 'deck-b-buttons' },
+    { id: 'button-34-ch3', type: 'button', channel: 3, number: 34, label: 'SAMPLER', section: 'deck-b-buttons' },
+    // Center Controls (All on Channel 6 = Spec Channel 7 BROWSER/GLOBAL)
+    // Row 1 - FX Assign buttons
+    { id: 'button-76-ch6', type: 'button', channel: 6, number: 76, label: 'FX1→D1', section: 'center-row-4' },
+    { id: 'button-80-ch6', type: 'button', channel: 6, number: 80, label: 'FX2→D1', section: 'center-row-4' },
+    { id: 'button-77-ch6', type: 'button', channel: 6, number: 77, label: 'FX1→D2', section: 'center-row-4' },
+    { id: 'button-81-ch6', type: 'button', channel: 6, number: 81, label: 'FX2→D2', section: 'center-row-4' },
     // Row 2 - DECK buttons for deck 1/3 and 2/4 switching
     { id: 'button-114-ch2', type: 'button', channel: 2, number: 114, label: 'DECK 1/3', section: 'center-row-2' },
     { id: 'button-114-ch3', type: 'button', channel: 3, number: 114, label: 'DECK 2/4', section: 'center-row-2' },
-    // Row 3 - Panel Select (browser) controls
-    { id: 'knob-64-ch6', type: 'knob', channel: 6, number: 64, label: '', section: 'center-browser' },
-    { id: 'button-65-ch6', type: 'button', channel: 6, number: 65, label: 'LOAD\nPREPARE', section: 'center-browser' },
-    // Row 4 - Back/Utility and Load/Prepare (2 buttons)
-    { id: 'button-101-ch6', type: 'button', channel: 6, number: 101, label: 'BACK\nUTILITY', section: 'center-view-area' },
-    { id: 'button-103-ch6', type: 'button', channel: 6, number: 103, label: 'LOAD\nPREPARE', section: 'center-view-area' },
-    // Row 5 - Load buttons (2 buttons)
+    // Row 3 - Browser controls
+    { id: 'knob-64-ch6', type: 'knob', channel: 6, number: 64, label: 'BROWSER', section: 'center-browser' },
+    { id: 'button-65-ch6', type: 'button', channel: 6, number: 65, label: 'BROWSER\nPRESS', section: 'center-browser' },
+    // Row 4 - LOAD and BACK buttons
+    { id: 'button-101-ch6', type: 'button', channel: 6, number: 101, label: 'LOAD', section: 'center-view-area' },
+    { id: 'button-103-ch6', type: 'button', channel: 6, number: 103, label: 'BACK', section: 'center-view-area' },
+    // Row 5 - Load Prepare buttons
     { id: 'button-70-ch6', type: 'button', channel: 6, number: 70, label: 'LOAD A', section: 'center-load' },
     { id: 'button-71-ch6', type: 'button', channel: 6, number: 71, label: 'LOAD B', section: 'center-load' },
-    // Row 6 - Shift (1 button)
+    { id: 'button-72-ch6', type: 'button', channel: 6, number: 72, label: 'LOAD B ALT', section: 'center-load' },
+    { id: 'button-73-ch6', type: 'button', channel: 6, number: 73, label: 'LOAD C', section: 'center-load' },
+    // Row 6 - Shift button
     { id: 'button-64-ch6', type: 'button', channel: 6, number: 64, label: 'SHIFT', section: 'center-shift' },
-    // Row 7 - Sampler Volume (vertical slider)
+    // Row 7 - Sampler Volume slider
     { id: 'knob-3-ch6', type: 'slider', channel: 6, number: 3, label: 'SAMPLER VOLUME', section: 'center-volume' },
 ];

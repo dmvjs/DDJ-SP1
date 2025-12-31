@@ -33,7 +33,6 @@ export class ControlStateManager {
   // Tempo management
   private currentTempo: 84 | 94 | 102 = 94;
   private readonly tempos: Array<84 | 94 | 102> = [84, 94, 102];
-  private lastTempoChangeTime: number = 0;
 
   // Sync state: tracks which decks are synced
   private syncStates: Map<number, boolean> = new Map([
@@ -122,10 +121,11 @@ export class ControlStateManager {
   }
 
   /**
-   * Check if a button is a performance pad (channels 7 & 8)
+   * Check if a button is a performance pad (channels 7, 8, 9, 10)
+   * Channel 7 = Deck 1, Channel 8 = Deck 2, Channel 9 = Deck 3, Channel 10 = Deck 4
    */
   isPerformancePad(channel: number): boolean {
-    return channel === 7 || channel === 8;
+    return channel === 7 || channel === 8 || channel === 9 || channel === 10;
   }
 
   /**
@@ -378,14 +378,16 @@ export class ControlStateManager {
 
   /**
    * Check if a button is a performance pad mode button
+   * Mode buttons are on deck control channels 0, 1, 2, 3 (for decks 1, 2, 3, 4)
    */
   isModeButton(channel: number, note: number): boolean {
-    return (channel === 0 || channel === 1) && this.modeButtons.includes(note);
+    return (channel === 0 || channel === 1 || channel === 2 || channel === 3) && this.modeButtons.includes(note);
   }
 
   /**
    * Handle mode button press (radio button behavior)
-   * Updates mode for the currently active deck (1-4) based on channel and DECK button state
+   * Updates mode for the currently active deck (1-4) based on channel
+   * Mode buttons are on deck control channels: 0, 1, 2, 3 (for decks 1, 2, 3, 4)
    * @returns {activeMode: number, channel: number, deck: number} if mode changed, null otherwise
    */
   handleModeButtonPress(channel: number, note: number, velocity: number): { activeMode: number; channel: number; deck: number } | null {
@@ -394,17 +396,8 @@ export class ControlStateManager {
       return null;
     }
 
-    // Determine which deck (1-4) this mode button applies to
-    // Channel 0 (left) → Deck 1 or 3 (based on DECK 1/3 button)
-    // Channel 1 (right) → Deck 2 or 4 (based on DECK 2/4 button)
-    let targetDeck: number;
-    if (channel === 0) {
-      const deck3Active = this.isDeckButtonOn(2, 114);
-      targetDeck = deck3Active ? 3 : 1;
-    } else {
-      const deck4Active = this.isDeckButtonOn(3, 114);
-      targetDeck = deck4Active ? 4 : 2;
-    }
+    // Map channel to deck: 0→1, 1→2, 2→3, 3→4
+    const targetDeck = channel + 1;
 
     // Set this as the active mode for the target deck
     this.padModes.set(targetDeck, note);

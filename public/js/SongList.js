@@ -6,8 +6,9 @@
  */
 
 export class SongList {
-  constructor(containerId) {
+  constructor(containerId, activeTracks) {
     this.container = document.getElementById(containerId);
+    this.activeTracks = activeTracks;
     this.songs = [];
     this.currentTempo = 94;
     this.referenceKey = null; // Key of track loaded on Deck 1
@@ -142,8 +143,10 @@ export class SongList {
 
   /**
    * Scroll the list (called by center knob)
+   * @param value - encoder value (1-63 = down, 65-127 = up)
+   * @param multiplier - scroll speed multiplier (default 1, 10 for SHIFT)
    */
-  scroll(value) {
+  scroll(value, multiplier = 1) {
     const filteredSongs = this.getFilteredSongs();
     if (filteredSongs.length === 0) return;
 
@@ -155,11 +158,12 @@ export class SongList {
     this.lastScrollTime = now;
 
     // Infinite encoder: 1-63 = down, 65-127 = up
-    // Scroll 1 item per event - dial turn speed naturally controls scroll speed
+    // Apply multiplier for fast scroll (e.g., 10x when SHIFT is held)
+    const scrollAmount = 1 * multiplier;
     if (value < 64) {
-      this.selectedIndex = Math.min(this.selectedIndex + 1, filteredSongs.length - 1);
+      this.selectedIndex = Math.min(this.selectedIndex + scrollAmount, filteredSongs.length - 1);
     } else if (value > 64) {
-      this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
+      this.selectedIndex = Math.max(this.selectedIndex - scrollAmount, 0);
     }
 
     this.render();
@@ -186,7 +190,7 @@ export class SongList {
   }
 
   /**
-   * Render the song list
+   * Render the song list in 4-column grid layout
    */
   render() {
     if (!this.container) return;
@@ -200,17 +204,18 @@ export class SongList {
           <span class="song-count">${filteredSongs.length} songs</span>
         </div>
         <div class="song-list-wrapper">
-          <ul class="song-list">
+          <div class="song-list-grid">
             ${filteredSongs.map((song, index) => `
-              <li class="song-item ${index === this.selectedIndex ? 'selected' : ''}" data-id="${song.id}">
-                <span class="song-id">#${song.id}</span>
-                <span class="song-artist">${this.escapeHtml(song.artist)}</span>
-                <span class="song-title">${this.escapeHtml(song.title)}</span>
-                <span class="song-key">Key ${song.key}</span>
-                <span class="song-bpm">${song.bpm}</span>
-              </li>
+              <div class="song-item ${index === this.selectedIndex ? 'selected' : ''}" data-id="${song.id}">
+                <span class="song-key key-${song.key}">${song.key}</span>
+                <span class="song-info">
+                  <span class="song-artist">${this.escapeHtml(song.artist)}</span>
+                  <span class="song-separator"> - </span>
+                  <span class="song-title">${this.escapeHtml(song.title)}</span>
+                </span>
+              </div>
             `).join('')}
-          </ul>
+          </div>
         </div>
       </div>
     `;
