@@ -59,13 +59,15 @@
 }
 
 /* ====== FX Knobs ====== */
-/* Outer white dashed ring - 7:00-5:00 range for FX knobs */
+/* Outer white dashed ring - 7:00-5:00 range for FX knobs and volume knobs */
 #knob-2-ch4 .knob-container::before,
 #knob-4-ch4 .knob-container::before,
 #knob-6-ch4 .knob-container::before,
 #knob-2-ch5 .knob-container::before,
 #knob-4-ch5 .knob-container::before,
-#knob-6-ch5 .knob-container::before {
+#knob-6-ch5 .knob-container::before,
+#knob-23-ch0 .knob-container::before,
+#knob-23-ch1 .knob-container::before {
   content: '' !important;
   position: absolute;
   inset: 0;
@@ -102,11 +104,9 @@
   z-index: var(--z-base);
 }
 
-/* Full ring for BEATS, AUTO LOOP, and BROWSER knobs */
+/* Full ring for BEATS and BROWSER knobs */
 .fx-knobs #knob-0-ch4 .knob-container::before,
 .fx-knobs #knob-0-ch5 .knob-container::before,
-#knob-23-ch0 .knob-container::before,
-#knob-23-ch1 .knob-container::before,
 #knob-64-ch6 .knob-container::before {
   content: '';
   position: absolute;

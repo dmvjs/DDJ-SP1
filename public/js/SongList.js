@@ -10,6 +10,7 @@ export class SongList {
     this.container = document.getElementById(containerId);
     this.songs = [];
     this.currentTempo = 94;
+    this.referenceKey = null; // Key of track loaded on Deck 1
     this.selectedIndex = 0;
     this.scrollPosition = 0;
     this.lastScrollTime = 0;
@@ -40,10 +41,59 @@ export class SongList {
   }
 
   /**
-   * Get filtered songs for current tempo
+   * Set reference key (from Deck 1's loaded track)
+   */
+  setReferenceKey(key) {
+    this.referenceKey = key;
+    this.selectedIndex = 0;
+    this.render();
+  }
+
+  /**
+   * Calculate key distance for harmonic mixing
+   * Returns 0 for same key, 1 for adjacent keys, 2 for next, etc.
+   */
+  getKeyDistance(key1, key2) {
+    if (key1 === key2) return 0;
+
+    // Calculate circular distance (keys wrap around: 12 -> 1)
+    const forward = (key2 - key1 + 12) % 12;
+    const backward = (key1 - key2 + 12) % 12;
+    return Math.min(forward, backward);
+  }
+
+  /**
+   * Get filtered and sorted songs for current tempo
    */
   getFilteredSongs() {
-    return this.songs.filter(song => song.bpm === this.currentTempo);
+    const filtered = this.songs.filter(song => song.bpm === this.currentTempo);
+
+    if (this.referenceKey) {
+      // Sort by harmonic mixing: same key first, then adjacent keys, etc.
+      return filtered.sort((a, b) => {
+        const distA = this.getKeyDistance(this.referenceKey, a.key);
+        const distB = this.getKeyDistance(this.referenceKey, b.key);
+
+        if (distA !== distB) {
+          return distA - distB; // Closer keys first
+        }
+
+        // Same key distance: sort by artist then title
+        const artistCompare = a.artist.localeCompare(b.artist);
+        if (artistCompare !== 0) return artistCompare;
+        return a.title.localeCompare(b.title);
+      });
+    } else {
+      // No reference key: sort by key order (1-12), then artist, then title
+      return filtered.sort((a, b) => {
+        if (a.key !== b.key) {
+          return a.key - b.key;
+        }
+        const artistCompare = a.artist.localeCompare(b.artist);
+        if (artistCompare !== 0) return artistCompare;
+        return a.title.localeCompare(b.title);
+      });
+    }
   }
 
   /**

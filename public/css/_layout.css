@@ -144,8 +144,8 @@
 }
 
 .fx-knobs .knob-container {
-  width: var(--knob-size-lg);
-  height: var(--knob-size-lg);
+  width: var(--knob-size-sm);
+  height: var(--knob-size-sm);
   position: relative;
 }
 
@@ -192,8 +192,14 @@
 }
 
 .performance-pads .button {
-  min-height: 80px;
-  border-radius: var(--radius-xl);
+  aspect-ratio: auto;
+  min-height: 54px;
+  max-height: 54px;
+  border-radius: var(--radius-sm);
+}
+
+.performance-pads .button::after {
+  display: none;
 }
 
 .performance-pads .control-label {

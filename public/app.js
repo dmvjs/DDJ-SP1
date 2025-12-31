@@ -13,6 +13,12 @@ const songList = new SongList('song-list');
 const activeTracks = new ActiveTracks('active-tracks');
 const audioPlayer = new AudioPlayer();
 
+// Track volume levels for each deck (0-127 MIDI range)
+const deckVolumes = new Map([
+  [0, 127], // Deck A (left) - full volume by default
+  [1, 127]  // Deck B (right) - full volume by default
+]);
+
 // Connect to server
 ws.connect(`ws://${window.location.host}`);
 
@@ -189,6 +195,12 @@ function handleLoadButton(buttonId) {
     activeTracks.loadTrack(targetDeck, selectedSong);
     console.log(`✓ Loaded to Deck ${targetDeck}`);
 
+    // If loading to Deck 1, update song list reference key for harmonic mixing
+    if (targetDeck === 1) {
+      songList.setReferenceKey(selectedSong.key);
+      console.log(`🎵 Song list sorted by key ${selectedSong.key} (harmonic mixing)`);
+    }
+
     // Preload audio files for instant playback
     audioPlayer.preloadSong(selectedSong);
   } else {
@@ -361,6 +373,49 @@ function handleKnobEvent(control, event, key) {
   // Check if this is the sampler volume slider (controls master volume)
   if (control.id === 'knob-3-ch6') {
     audioPlayer.setMasterVolume(event.value);
+  }
+
+  // Check if this is a volume knob (infinite encoder, fast scrolling)
+  if (control.id === 'knob-23-ch0' || control.id === 'knob-23-ch1') {
+    const deckIndex = control.id === 'knob-23-ch0' ? 0 : 1; // 0 = left, 1 = right
+
+    // Get current volume
+    let currentVolume = deckVolumes.get(deckIndex);
+
+    // Calculate delta from center (64)
+    // Negate for correct direction, use 0.3x multiplier for fine control
+    const delta = Math.round(-(event.value - 64) * 0.3);
+
+    // Update volume with clamping (0-127)
+    currentVolume = Math.max(0, Math.min(127, currentVolume + delta));
+    deckVolumes.set(deckIndex, currentVolume);
+
+    // Determine which decks to control based on DECK button state
+    const deck3Active = state.isDeckButtonActive(2);
+    const deck4Active = state.isDeckButtonActive(3);
+
+    if (deckIndex === 0) {
+      // Left volume knob: controls deck 1 or 3
+      const targetDeck = deck3Active ? 2 : 0; // Audio deck 0-3
+      audioPlayer.setVolume(targetDeck, currentVolume);
+    } else {
+      // Right volume knob: controls deck 2 or 4
+      const targetDeck = deck4Active ? 3 : 1; // Audio deck 0-3
+      audioPlayer.setVolume(targetDeck, currentVolume);
+    }
+
+    // Update the UI with raw value for correct rotation, but display as percentage
+    state.updateKnob(control.id, currentVolume);
+    ui.updateKnob(control.element, key, currentVolume, state);
+
+    // Update the displayed text to show percentage
+    const percentage = Math.round((currentVolume / 127) * 100);
+    const valueDisplay = control.element.querySelector('.knob-value');
+    if (valueDisplay) {
+      valueDisplay.textContent = percentage;
+    }
+
+    return; // Skip default knob handling
   }
 
   // Check if this is a slider

@@ -52,11 +52,11 @@ export const DDJ_SP1_LAYOUT = [
     { id: 'button-74-ch4', type: 'button', channel: 4, number: 74, label: 'FX ASSIGN', section: 'deck-a-buttons' },
     // Deck A - Middle Button Row
     { id: 'button-88-ch0', type: 'button', channel: 0, number: 88, label: 'SYNC', section: 'deck-a-buttons' },
-    { id: 'button-64-ch0', type: 'button', channel: 0, number: 64, label: 'SLIP', section: 'deck-a-buttons' },
+    { id: 'button-64-ch0', type: 'button', channel: 0, number: 64, label: 'STOP', section: 'deck-a-buttons' },
     { id: 'button-21-ch0', type: 'button', channel: 0, number: 21, label: 'CENSOR', section: 'deck-a-buttons' },
     { id: 'button-param-left-ch0', type: 'button', channel: 0, number: 200, label: 'PARAM.1', section: 'deck-a-buttons' },
     { id: 'button-param-right-ch0', type: 'button', channel: 0, number: 201, label: 'PARAM.1', section: 'deck-a-buttons' },
-    { id: 'knob-23-ch0', type: 'knob', channel: 0, number: 23, label: 'AUTO LOOP', section: 'deck-a-buttons' },
+    { id: 'knob-23-ch0', type: 'knob', channel: 0, number: 23, label: 'VOLUME', section: 'deck-a-buttons' },
     // Deck A - Bottom Button Row (Pad Modes)
     { id: 'button-27-ch0', type: 'button', channel: 0, number: 27, label: 'HOT CUE', section: 'deck-a-buttons' },
     { id: 'button-30-ch0', type: 'button', channel: 0, number: 30, label: 'ROLL', section: 'deck-a-buttons' },
@@ -69,11 +69,11 @@ export const DDJ_SP1_LAYOUT = [
     { id: 'button-74-ch5', type: 'button', channel: 5, number: 74, label: 'FX ASSIGN', section: 'deck-b-buttons' },
     // Deck B - Middle Button Row
     { id: 'button-88-ch1', type: 'button', channel: 1, number: 88, label: 'SYNC', section: 'deck-b-buttons' },
-    { id: 'button-64-ch1', type: 'button', channel: 1, number: 64, label: 'SLIP', section: 'deck-b-buttons' },
+    { id: 'button-64-ch1', type: 'button', channel: 1, number: 64, label: 'STOP', section: 'deck-b-buttons' },
     { id: 'button-21-ch1', type: 'button', channel: 1, number: 21, label: 'CENSOR', section: 'deck-b-buttons' },
     { id: 'button-param-left-ch1', type: 'button', channel: 1, number: 200, label: 'PARAM.1', section: 'deck-b-buttons' },
     { id: 'button-param-right-ch1', type: 'button', channel: 1, number: 201, label: 'PARAM.1', section: 'deck-b-buttons' },
-    { id: 'knob-23-ch1', type: 'knob', channel: 1, number: 23, label: 'AUTO LOOP', section: 'deck-b-buttons' },
+    { id: 'knob-23-ch1', type: 'knob', channel: 1, number: 23, label: 'VOLUME', section: 'deck-b-buttons' },
     // Deck B - Bottom Button Row (Pad Modes)
     { id: 'button-27-ch1', type: 'button', channel: 1, number: 27, label: 'HOT CUE', section: 'deck-b-buttons' },
     { id: 'button-30-ch1', type: 'button', channel: 1, number: 30, label: 'ROLL', section: 'deck-b-buttons' },
