@@ -15,7 +15,9 @@ export class SongList {
     this.scrollPosition = 0;
     this.lastScrollTime = 0;
     this.scrollDebounceMs = 0; // No debounce - raw dial speed
+    this.isExpanded = false;
     this.loadSongs();
+    this.startExpandCheck();
   }
 
   /**
@@ -94,6 +96,48 @@ export class SongList {
         return a.title.localeCompare(b.title);
       });
     }
+  }
+
+  /**
+   * Start checking for expand/collapse based on scroll activity
+   */
+  startExpandCheck() {
+    setInterval(() => {
+      const now = Date.now();
+      const timeSinceScroll = now - this.lastScrollTime;
+
+      if (timeSinceScroll < 3000 && !this.isExpanded) {
+        // Scrolling recently - expand
+        this.expand();
+      } else if (timeSinceScroll >= 3000 && this.isExpanded) {
+        // No scrolling for 3 seconds - collapse
+        this.collapse();
+      }
+    }, 100); // Check every 100ms
+  }
+
+  /**
+   * Expand the song list to fill the screen
+   */
+  expand() {
+    this.isExpanded = true;
+    this.container.classList.add('expanded');
+
+    // Center the selected item after a brief delay to allow layout to settle
+    setTimeout(() => {
+      const selectedItem = this.container.querySelector('.song-item.selected');
+      if (selectedItem) {
+        selectedItem.scrollIntoView({ block: 'center', behavior: 'auto' });
+      }
+    }, 50);
+  }
+
+  /**
+   * Collapse the song list to normal size
+   */
+  collapse() {
+    this.isExpanded = false;
+    this.container.classList.remove('expanded');
   }
 
   /**
