@@ -6,8 +6,9 @@
  */
 
 export class ActiveTracks {
-  constructor(containerId) {
+  constructor(containerId, ws) {
     this.container = document.getElementById(containerId);
+    this.ws = ws; // WebSocket client for sending deck load notifications
     this.tracks = {
       1: null,
       2: null,
@@ -23,10 +24,22 @@ export class ActiveTracks {
   loadTrack(deck, song) {
     console.log(`📥 ActiveTracks.loadTrack: deck=${deck}, song=${song?.title}`);
     console.log(`   Before:`, this.tracks);
+    const wasLoaded = this.tracks[deck] !== null;
+    const isLoaded = song !== null;
+
     this.tracks[deck] = song;
     console.log(`   After:`, this.tracks);
     this.render();
     console.log(`   ✓ Rendered`);
+
+    // Notify backend of deck load state change
+    if (wasLoaded !== isLoaded) {
+      this.ws.send({
+        type: 'deckLoad',
+        data: { deck, loaded: isLoaded }
+      });
+      console.log(`📡 Sent deckLoad notification: deck=${deck}, loaded=${isLoaded}`);
+    }
   }
 
   /**

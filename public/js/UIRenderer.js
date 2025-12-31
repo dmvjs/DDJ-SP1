@@ -8,13 +8,13 @@ export class UIRenderer {
   constructor() {
     this.fxKnobs = new Set([
       'knob-2-ch4', 'knob-4-ch4', 'knob-6-ch4',
-      'knob-2-ch5', 'knob-4-ch5', 'knob-6-ch5'
+      'knob-2-ch5', 'knob-4-ch5', 'knob-6-ch5',
+      'knob-23-ch0', 'knob-23-ch1', 'knob-23-ch2', 'knob-23-ch3'  // Volume knobs (7:00 to 5:00)
     ]);
 
-    // Limited-range knobs (BEATS, AUTO LOOP, center browser) - scale for more visual movement
+    // Limited-range knobs (BEATS, center browser) - scale for more visual movement
     this.limitedRangeKnobs = new Set([
       'knob-0-ch4', 'knob-0-ch5',   // BEATS
-      'knob-23-ch0', 'knob-23-ch1',  // AUTO LOOP
       'knob-64-ch6'                   // Center browser knob
     ]);
   }

@@ -59,21 +59,20 @@ export class DeviceManager extends EventEmitter {
     }
     /**
      * Initialize LEDs on device connection
-     * Sets HOT CUE mode as active on all 4 decks
+     * All decks start with no modes lit (empty)
      */
     initializeLEDs() {
         if (!this.output)
             return;
-        // Light up HOT CUE button (note 27) on all 4 deck channels
-        // Mode buttons are on performance pad channels: 7, 8, 9, 10 (decks 1, 2, 3, 4)
-        this.setLED(7, 27, 127); // Deck 1
-        this.setLED(8, 27, 127); // Deck 2
-        this.setLED(9, 27, 127); // Deck 3
-        this.setLED(10, 27, 127); // Deck 4
-        // Light up active pads for HOT CUE mode
-        this.updatePadLEDsForChannel(0); // Left pads (Deck 1)
-        this.updatePadLEDsForChannel(1); // Right pads (Deck 2)
-        console.log('🎮 Initialized: HOT CUE mode active on all decks');
+        // Turn off all mode LEDs initially (decks start empty)
+        const modeButtons = this.stateManager.getModeButtons();
+        for (let deck = 1; deck <= 4; deck++) {
+            const padChannel = deck + 6; // Deck 1→ch7, Deck 2→ch8, Deck 3→ch9, Deck 4→ch10
+            modeButtons.forEach(btn => {
+                this.setLED(padChannel, btn, 0);
+            });
+        }
+        console.log('🎮 Initialized: All decks empty, no modes active');
     }
     /**
      * Update performance pad LEDs for a channel based on current deck's mode
@@ -121,6 +120,7 @@ export class DeviceManager extends EventEmitter {
     }
     /**
      * Re-initialize mode button LEDs (called when state needs to be synced)
+     * Only lights up modes for decks that have songs loaded
      */
     syncModeLEDs() {
         if (!this.output)
@@ -130,10 +130,20 @@ export class DeviceManager extends EventEmitter {
         // Mode buttons are on channels 7, 8, 9, 10 (decks 1, 2, 3, 4)
         for (let deck = 1; deck <= 4; deck++) {
             const padChannel = deck + 6; // Deck 1→ch7, Deck 2→ch8, Deck 3→ch9, Deck 4→ch10
-            const activeMode = this.stateManager.getActiveMode(deck);
-            modeButtons.forEach(btn => {
-                this.setLED(padChannel, btn, btn === activeMode ? 127 : 0);
-            });
+            const isDeckLoaded = this.stateManager.isDeckLoaded(deck);
+            if (isDeckLoaded) {
+                // Deck has a song - show active mode
+                const activeMode = this.stateManager.getActiveMode(deck);
+                modeButtons.forEach(btn => {
+                    this.setLED(padChannel, btn, btn === activeMode ? 127 : 0);
+                });
+            }
+            else {
+                // Deck is empty - turn off all mode LEDs
+                modeButtons.forEach(btn => {
+                    this.setLED(padChannel, btn, 0);
+                });
+            }
         }
         // Update pad LEDs based on active deck's mode
         this.updatePadLEDsForChannel(0); // Left pads (Deck 1 or 3)
@@ -183,6 +193,40 @@ export class DeviceManager extends EventEmitter {
      */
     getStateManager() {
         return this.stateManager;
+    }
+    /**
+     * Handle deck load/unload event from frontend
+     * @param deck - Deck number (1-4)
+     * @param loaded - True if song loaded, false if unloaded
+     */
+    handleDeckLoadChange(deck, loaded) {
+        this.stateManager.setDeckLoaded(deck, loaded);
+        const padChannel = deck + 6; // Deck 1→ch7, Deck 2→ch8, Deck 3→ch9, Deck 4→ch10
+        const modeButtons = this.stateManager.getModeButtons();
+        if (loaded) {
+            // Song loaded - light up HOT CUE mode (default)
+            const activeMode = this.stateManager.getActiveMode(deck);
+            modeButtons.forEach(btn => {
+                this.setLED(padChannel, btn, btn === activeMode ? 127 : 0);
+            });
+            console.log(`✨ Deck ${deck} loaded - HOT CUE mode active`);
+            // Update pad LEDs
+            const uiChannel = (deck === 1 || deck === 3) ? 0 : 1;
+            this.updatePadLEDsForChannel(uiChannel);
+        }
+        else {
+            // Song unloaded - turn off all mode LEDs
+            modeButtons.forEach(btn => {
+                this.setLED(padChannel, btn, 0);
+            });
+            console.log(`💤 Deck ${deck} unloaded - modes off`);
+            // Turn off pad LEDs
+            const uiChannel = (deck === 1 || deck === 3) ? 0 : 1;
+            // Turn off all pads for this deck
+            for (let i = 0; i < 8; i++) {
+                this.setLED(padChannel, i, 0);
+            }
+        }
     }
     /**
      * Send LED control message to the device
@@ -255,6 +299,12 @@ export class DeviceManager extends EventEmitter {
             if (isModeButton) {
                 const modeChange = this.stateManager.handleModeButtonPress(msg.channel, msg.note, msg.velocity);
                 if (modeChange) {
+                    // Only allow mode changes for loaded decks
+                    const isDeckLoaded = this.stateManager.isDeckLoaded(modeChange.deck);
+                    if (!isDeckLoaded) {
+                        console.log(`⚠️  Ignoring mode button for empty deck ${modeChange.deck}`);
+                        return;
+                    }
                     // Turn off all mode button LEDs for this pad channel
                     const modeButtons = this.stateManager.getModeButtons();
                     modeButtons.forEach(btn => {
@@ -505,6 +555,8 @@ export class DeviceManager extends EventEmitter {
         });
         // Handle knobs and dials (Control Change)
         this.input.on('cc', (msg) => {
+            // Log ALL CC messages for debugging
+            console.log(`🎛️  CC: ch${msg.channel} CC${msg.controller} value=${msg.value}`);
             // Check if this is SHIFT + volume knob (CC 55) = tempo control
             // According to spec: volume knob sends CC 23 normally, CC 55 when SHIFT is held
             const isShiftedVolumeKnob = msg.controller === 55 && (msg.channel >= 0 && msg.channel <= 3);
@@ -518,13 +570,7 @@ export class DeviceManager extends EventEmitter {
                 }
                 return; // Don't emit normal knob event
             }
-            // Check if this is SHIFT + rotary selector/browse knob (CC 100) = 10x scroll speed
-            // According to spec: browse knob sends CC 64 normally, CC 100 when SHIFT is held
-            const isShiftedBrowseKnob = msg.controller === 100 && msg.channel === 6;
-            if (isShiftedBrowseKnob) {
-                // SHIFT + Browse knob = fast scroll (10x speed)
-                console.log(`⚡ SHIFT + BROWSE (10x scroll): value=${msg.value}`);
-            }
+            // Note: SHIFT + browse knob sends CC 100 (handled in frontend as quick scroll)
             const event = {
                 type: 'knob',
                 knob: msg.controller,

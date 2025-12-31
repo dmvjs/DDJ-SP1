@@ -36,11 +36,11 @@
 .song-item {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.3rem 0.5rem;
+  gap: 0.3rem;
+  padding: 0.2rem 0.4rem;
   background: #1a1a1a;
-  font-size: 11px;
-  line-height: 1.2;
+  font-size: 10px;
+  line-height: 1.1;
   transition: background-color 0.1s ease;
   overflow: hidden;
 }
@@ -53,17 +53,17 @@
 /* Selected item */
 .song-item.selected {
   background-color: #2a4a6a !important;
-  border: 2px solid #4a90ff;
+  border: 1px solid #4a90ff;
 }
 
 .song-key {
   font-weight: 700;
-  font-size: 9px;
-  padding: 0.15rem 0.3rem;
-  border-radius: 3px;
+  font-size: 8px;
+  padding: 0.1rem 0.25rem;
+  border-radius: 2px;
   flex-shrink: 0;
   text-align: center;
-  min-width: 22px;
+  min-width: 20px;
 }
 
 .song-info {
@@ -87,19 +87,19 @@
   color: #888;
 }
 
-/* Key color badges - Camelot wheel inspired (same as active tracks) */
-.song-key.key-1 { background: #ff6b6b; color: #000; }
-.song-key.key-2 { background: #ffa94d; color: #000; }
-.song-key.key-3 { background: #ffd43b; color: #000; }
-.song-key.key-4 { background: #a9e34b; color: #000; }
-.song-key.key-5 { background: #51cf66; color: #000; }
-.song-key.key-6 { background: #22b8cf; color: #000; }
-.song-key.key-7 { background: #4dabf7; color: #000; }
-.song-key.key-8 { background: #748ffc; color: #000; }
-.song-key.key-9 { background: #9775fa; color: #000; }
-.song-key.key-10 { background: #da77f2; color: #000; }
-.song-key.key-11 { background: #f783ac; color: #000; }
-.song-key.key-12 { background: #ff8787; color: #000; }
+/* Key color badges - Outline style */
+.song-key.key-1 { border: 1px solid #ff6b6b; color: #ff6b6b; background: transparent; }
+.song-key.key-2 { border: 1px solid #ffa94d; color: #ffa94d; background: transparent; }
+.song-key.key-3 { border: 1px solid #ffd43b; color: #ffd43b; background: transparent; }
+.song-key.key-4 { border: 1px solid #a9e34b; color: #a9e34b; background: transparent; }
+.song-key.key-5 { border: 1px solid #51cf66; color: #51cf66; background: transparent; }
+.song-key.key-6 { border: 1px solid #22b8cf; color: #22b8cf; background: transparent; }
+.song-key.key-7 { border: 1px solid #4dabf7; color: #4dabf7; background: transparent; }
+.song-key.key-8 { border: 1px solid #748ffc; color: #748ffc; background: transparent; }
+.song-key.key-9 { border: 1px solid #9775fa; color: #9775fa; background: transparent; }
+.song-key.key-10 { border: 1px solid #da77f2; color: #da77f2; background: transparent; }
+.song-key.key-11 { border: 1px solid #f783ac; color: #f783ac; background: transparent; }
+.song-key.key-12 { border: 1px solid #ff8787; color: #ff8787; background: transparent; }
 
 .tempo-display {
   font-size: 16px;

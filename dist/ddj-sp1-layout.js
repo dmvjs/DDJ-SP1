@@ -110,6 +110,7 @@ export const DDJ_SP1_LAYOUT = [
     { id: 'button-114-ch3', type: 'button', channel: 3, number: 114, label: 'DECK 2/4', section: 'center-row-2' },
     // Row 3 - Browser controls
     { id: 'knob-64-ch6', type: 'knob', channel: 6, number: 64, label: 'BROWSER', section: 'center-browser' },
+    { id: 'knob-100-ch6', type: 'knob', channel: 6, number: 100, label: 'BROWSER\n(SHIFT)', section: 'center-browser' },
     { id: 'button-65-ch6', type: 'button', channel: 6, number: 65, label: 'BROWSER\nPRESS', section: 'center-browser' },
     // Row 4 - LOAD and BACK buttons
     { id: 'button-101-ch6', type: 'button', channel: 6, number: 101, label: 'LOAD', section: 'center-view-area' },

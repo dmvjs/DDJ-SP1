@@ -32,6 +32,13 @@ export class ControlStateManager {
             [3, false],
             [4, false],
         ]);
+        // Deck loaded state: tracks which decks have songs loaded
+        this.deckLoadedStates = new Map([
+            [1, false],
+            [2, false],
+            [3, false],
+            [4, false],
+        ]);
         // Map shifted note numbers to their unshifted equivalents
         this.shiftedNoteMap = new Map([
             [99, 71], // FX1
@@ -430,5 +437,18 @@ export class ControlStateManager {
      */
     isSynced(deck) {
         return this.syncStates.get(deck) || false;
+    }
+    /**
+     * Set deck loaded state
+     */
+    setDeckLoaded(deck, loaded) {
+        this.deckLoadedStates.set(deck, loaded);
+        console.log(`📀 Deck ${deck} loaded state: ${loaded}`);
+    }
+    /**
+     * Check if a deck has a song loaded
+     */
+    isDeckLoaded(deck) {
+        return this.deckLoadedStates.get(deck) || false;
     }
 }

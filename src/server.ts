@@ -138,6 +138,21 @@ wss.on('connection', (ws) => {
   // Sync device LEDs to match current state
   manager.syncModeLEDs();
 
+  // Handle messages from frontend
+  ws.on('message', (data: string) => {
+    try {
+      const message = JSON.parse(data);
+
+      if (message.type === 'deckLoad') {
+        // Frontend notifying backend that a deck loaded/unloaded a song
+        const { deck, loaded } = message.data;
+        manager.handleDeckLoadChange(deck, loaded);
+      }
+    } catch (error) {
+      console.error('Error parsing WebSocket message:', error);
+    }
+  });
+
   ws.on('close', () => {
     console.log('Client disconnected');
   });

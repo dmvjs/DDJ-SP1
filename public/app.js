@@ -9,7 +9,7 @@ import { AudioPlayer } from './js/AudioPlayer.js';
 const ws = new WebSocketClient();
 const state = new ControllerState();
 const ui = new UIRenderer();
-const activeTracks = new ActiveTracks('active-tracks');
+const activeTracks = new ActiveTracks('active-tracks', ws);
 const songList = new SongList('song-list', activeTracks);
 const audioPlayer = new AudioPlayer();
 
@@ -148,6 +148,8 @@ function handleButtonEvent(control, event) {
     console.log(`✅ Calling handleLoadButton for ${control.id}`);
     handleLoadButton(control.id);
   }
+
+  // Browse knob press - no action (SHIFT + turn for quick mode)
 
   // Handle SLIP buttons - fade out that deck (only on button press)
   // Support all 4 deck channels (0, 1, 2, 3)
@@ -363,12 +365,12 @@ function handleSyncButton(buttonId) {
 function handleKnobEvent(control, event, key) {
   // Check if this is the center browser knob (controls song list scrolling)
   if (control.id === 'knob-64-ch6') {
-    songList.scroll(event.value, 1); // Normal speed
+    songList.scroll(event.value, 1); // Normal: ±1 song
   }
 
-  // Check if this is SHIFT + browser knob (10x fast scroll)
+  // Check if this is SHIFT + browser knob (quick mode: ±4 songs per turn)
   if (control.id === 'knob-100-ch6') {
-    songList.scroll(event.value, 10); // 10x speed
+    songList.scroll(event.value, 4); // Quick: ±4 songs (one row)
   }
 
   // Check if this is the sampler volume slider (controls master volume)
@@ -693,7 +695,11 @@ function handlePadRelease(padData) {
 
   // Determine which deck to control
   let targetDeck;
-  if (channel === 7) {
+  if (channel === 9) {
+    targetDeck = 3;
+  } else if (channel === 10) {
+    targetDeck = 4;
+  } else if (channel === 7) {
     const deck3Active = state.isDeckButtonActive(2);
     targetDeck = deck3Active ? 3 : 1;
   } else if (channel === 8) {
@@ -704,7 +710,9 @@ function handlePadRelease(padData) {
   }
 
   // Check active mode for this deck
-  const activeMode = state.getActiveModeForChannel(channel === 7 ? 0 : 1);
+  // UI channel 0 = left pads (deck 1/3), UI channel 1 = right pads (deck 2/4)
+  const uiChannel = (channel === 7 || channel === 9) ? 0 : 1;
+  const activeMode = state.getActiveModeForChannel(uiChannel);
 
   // ROLL MODE (30): Stop roll on release
   if (activeMode === 30) {

@@ -16,9 +16,7 @@ export class SongList {
     this.scrollPosition = 0;
     this.lastScrollTime = 0;
     this.scrollDebounceMs = 0; // No debounce - raw dial speed
-    this.isExpanded = false;
     this.loadSongs();
-    this.startExpandCheck();
   }
 
   /**
@@ -100,51 +98,9 @@ export class SongList {
   }
 
   /**
-   * Start checking for expand/collapse based on scroll activity
-   */
-  startExpandCheck() {
-    setInterval(() => {
-      const now = Date.now();
-      const timeSinceScroll = now - this.lastScrollTime;
-
-      if (timeSinceScroll < 3000 && !this.isExpanded) {
-        // Scrolling recently - expand
-        this.expand();
-      } else if (timeSinceScroll >= 3000 && this.isExpanded) {
-        // No scrolling for 3 seconds - collapse
-        this.collapse();
-      }
-    }, 100); // Check every 100ms
-  }
-
-  /**
-   * Expand the song list to fill the screen
-   */
-  expand() {
-    this.isExpanded = true;
-    this.container.classList.add('expanded');
-
-    // Center the selected item after a brief delay to allow layout to settle
-    setTimeout(() => {
-      const selectedItem = this.container.querySelector('.song-item.selected');
-      if (selectedItem) {
-        selectedItem.scrollIntoView({ block: 'center', behavior: 'auto' });
-      }
-    }, 50);
-  }
-
-  /**
-   * Collapse the song list to normal size
-   */
-  collapse() {
-    this.isExpanded = false;
-    this.container.classList.remove('expanded');
-  }
-
-  /**
    * Scroll the list (called by center knob)
    * @param value - encoder value (1-63 = down, 65-127 = up)
-   * @param multiplier - scroll speed multiplier (default 1, 10 for SHIFT)
+   * @param multiplier - scroll amount (1 = normal, 4 = quick mode via SHIFT)
    */
   scroll(value, multiplier = 1) {
     const filteredSongs = this.getFilteredSongs();
@@ -158,12 +114,11 @@ export class SongList {
     this.lastScrollTime = now;
 
     // Infinite encoder: 1-63 = down, 65-127 = up
-    // Apply multiplier for fast scroll (e.g., 10x when SHIFT is held)
-    const scrollAmount = 1 * multiplier;
+    // Multiplier sets scroll amount: 1 = normal, 4 = quick mode (one row)
     if (value < 64) {
-      this.selectedIndex = Math.min(this.selectedIndex + scrollAmount, filteredSongs.length - 1);
+      this.selectedIndex = Math.min(this.selectedIndex + multiplier, filteredSongs.length - 1);
     } else if (value > 64) {
-      this.selectedIndex = Math.max(this.selectedIndex - scrollAmount, 0);
+      this.selectedIndex = Math.max(this.selectedIndex - multiplier, 0);
     }
 
     this.render();
