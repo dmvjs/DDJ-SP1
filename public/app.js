@@ -132,6 +132,11 @@ function handleButtonEvent(control, event) {
     console.log(`✅ Calling handleLoadButton for ${control.id}`);
     handleLoadButton(control.id);
   }
+
+  // Handle SLIP buttons - fade out that deck (only on button press)
+  if (event.pressed && (control.id === 'button-64-ch0' || control.id === 'button-64-ch1')) {
+    handleSlipButton(control.id);
+  }
 }
 
 /**
@@ -170,6 +175,29 @@ function handleLoadButton(buttonId) {
     audioPlayer.preloadSong(selectedSong);
   } else {
     console.log('⚠️ No target deck determined!');
+  }
+}
+
+/**
+ * Handle SLIP button press to fade out that deck
+ */
+function handleSlipButton(buttonId) {
+  let targetDeck;
+
+  if (buttonId === 'button-64-ch0') {
+    // SLIP A (left): deck 1 or 3 based on DECK 1/3 button
+    const deck3Active = state.isDeckButtonActive(2);
+    targetDeck = deck3Active ? 3 : 1;
+  } else if (buttonId === 'button-64-ch1') {
+    // SLIP B (right): deck 2 or 4 based on DECK 2/4 button
+    const deck4Active = state.isDeckButtonActive(3);
+    targetDeck = deck4Active ? 4 : 2;
+  }
+
+  if (targetDeck) {
+    const audioDeck = targetDeck - 1; // Convert deck 1-4 to audio deck 0-3
+    audioPlayer.fadeOut(audioDeck, 0.2); // 200ms fadeout
+    console.log(`💫 SLIP pressed: Fading out Deck ${targetDeck}`);
   }
 }
 

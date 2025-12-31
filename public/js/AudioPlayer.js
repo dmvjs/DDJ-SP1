@@ -223,6 +223,41 @@ export class AudioPlayer {
   }
 
   /**
+   * Fade out and stop playback on a specific deck
+   * @param {number} deck - Deck number (0-3)
+   * @param {number} fadeTime - Fade duration in seconds (default 0.2s)
+   */
+  fadeOut(deck, fadeTime = 0.2) {
+    const source = this.activeSources.get(deck);
+    if (!source) {
+      console.log(`⚠️  No audio playing on Deck ${deck + 1}`);
+      return;
+    }
+
+    const gainNode = this.deckGains.get(deck);
+    if (!gainNode) return;
+
+    try {
+      const now = this.audioContext.currentTime;
+
+      // Ramp gain from current value down to 0
+      gainNode.gain.cancelScheduledValues(now);
+      gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+      gainNode.gain.linearRampToValueAtTime(0, now + fadeTime);
+
+      console.log(`🔇 Deck ${deck + 1} FADE OUT (${fadeTime * 1000}ms)`);
+
+      // Stop completely after fade and restore gain
+      setTimeout(() => {
+        this.stop(deck);
+        gainNode.gain.value = 1.0; // Restore full volume for next play
+      }, fadeTime * 1000 + 50);
+    } catch (error) {
+      console.error(`Failed to fade out Deck ${deck + 1}:`, error);
+    }
+  }
+
+  /**
    * Spindown effect (vinyl stop / brake)
    * Slows playback to a stop like stopping a record by hand
    */

@@ -13,7 +13,7 @@ export class SongList {
     this.selectedIndex = 0;
     this.scrollPosition = 0;
     this.lastScrollTime = 0;
-    this.scrollDebounceMs = 400; // Only allow one scroll per 400ms
+    this.scrollDebounceMs = 0; // No debounce - raw dial speed
     this.loadSongs();
   }
 
@@ -61,11 +61,10 @@ export class SongList {
     this.lastScrollTime = now;
 
     // Infinite encoder: 1-63 = down, 65-127 = up
+    // Scroll 1 item per event - dial turn speed naturally controls scroll speed
     if (value < 64) {
-      // Scroll down
       this.selectedIndex = Math.min(this.selectedIndex + 1, filteredSongs.length - 1);
     } else if (value > 64) {
-      // Scroll up
       this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
     }
 
